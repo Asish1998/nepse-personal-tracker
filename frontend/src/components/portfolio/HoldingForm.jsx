@@ -5,8 +5,16 @@ import { fmtNPR, today } from '../../utils/formatters'
 
 const empty = { sym: '', qty: '', buy: '', cur: '', date: today(), shareType: 'Secondary' }
 
+function FeeRow({ label, value, bold, sub }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', margin: '4px 0', fontSize: 12 }}>
+      <span style={{ color: 'var(--text-muted)' }}>{label} {sub && <span style={{ fontSize: 9 }}>({sub})</span>}</span>
+      <span style={{ fontWeight: bold ? 700 : 400, fontFamily: 'var(--mono)', color: 'var(--text-main)' }}>{value}</span>
+    </div>
+  )
+}
+
 export default function HoldingForm({ onClose }) {
-  const { dispatch } = useApp()
   const [form, setForm]   = useState(empty)
   const [symbols, setSymbols] = useState([])
   const [showList, setShowList] = useState(false)
@@ -133,10 +141,14 @@ export default function HoldingForm({ onClose }) {
 
       {preview && (
         <div style={styles.feeBox}>
-          <div style={styles.feeTitle}>Cost Breakdown</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-            <span style={{ color: 'var(--text-muted)' }}>Total Cost</span>
-            <span style={{ fontWeight: 600 }}>NPR {fmtNPR(preview.totalCost)}</span>
+          <div style={styles.feeTitle}>Live Cost Breakdown (BUY)</div>
+          <div style={styles.feeRows}>
+             <FeeRow label="Gross Amount" value={`NPR ${fmtNPR(preview.fees.grossAmount)}`} />
+             <FeeRow label={`Commission: ${preview.fees.tier}`} value={`NPR ${fmtNPR(preview.fees.commission)}`} />
+             <FeeRow label="SEBON Fee (0.015%)" value={`NPR ${fmtNPR(preview.fees.sebonFee)}`} />
+             <div style={styles.divider} />
+             <FeeRow label="TOTAL OUTFLOW" value={`NPR ${fmtNPR(preview.totalCost)}`} bold />
+             <FeeRow label="Net Cost / Share" value={`NPR ${fmtNPR(preview.effPricePerShare)}`} sub="Real Entry Basis" />
           </div>
         </div>
       )}
@@ -184,6 +196,8 @@ const styles = {
     borderBottom: '1px solid var(--border)',
     alignItems: 'center'
   },
-  feeBox: { background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '12px', marginBottom: '12px', border: '1px solid var(--border)' },
-  feeTitle: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', marginBottom: 8, color: 'var(--text-muted)' }
+  feeBox: { background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '16px', marginBottom: '20px', border: '1px solid var(--border)' },
+  feeTitle: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', marginBottom: 12, color: 'var(--text-muted)', letterSpacing: '0.05em' },
+  divider: { height: 1, background: 'var(--border)', margin: '8px 0' },
+  feeRows: { display: 'flex', flexDirection: 'column' }
 }

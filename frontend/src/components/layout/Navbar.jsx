@@ -5,7 +5,6 @@ const tabs = [
   { key: 'journal',    label: 'Trade Journal'  },
   { key: 'alerts',     label: 'Alerts'         },
   { key: 'watchlist',  label: 'Watchlist'      },
-  { key: 'feeref',     label: 'Fee Reference'  },
 ]
 
 export default function Navbar({ active, onChange }) {

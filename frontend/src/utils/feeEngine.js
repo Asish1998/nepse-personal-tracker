@@ -8,12 +8,12 @@ const DP_CHARGE    = 25;       // NPR 25 flat — sell only
 const CGT_SHORT    = 0.075;    // < 365 days
 const CGT_LONG     = 0.05;     // ≥ 365 days
 
-export function commissionRate(amount) {
-  if (amount <= 50_000)    return 0.0036;
-  if (amount <= 500_000)   return 0.0033;
-  if (amount <= 2_000_000) return 0.0031;
-  if (amount <= 10_000_000)return 0.0027;
-  return 0.0024;
+export function getCommissionInfo(amount) {
+  if (amount <= 50_000)    return { rate: 0.0036, label: '0.36% (≤ 50K)' };
+  if (amount <= 500_000)   return { rate: 0.0033, label: '0.33% (50K - 5L)' };
+  if (amount <= 2_000_000) return { rate: 0.0031, label: '0.31% (5L - 20L)' };
+  if (amount <= 10_000_000)return { rate: 0.0027, label: '0.27% (20L - 1Cr)' };
+  return { rate: 0.0024, label: '0.24% (> 1Cr)' };
 }
 
 /**
@@ -28,7 +28,7 @@ export function commissionRate(amount) {
 export function calcFees(grossAmount, type, holdingDays = 0, grossProfit = 0) {
   if (!grossAmount || grossAmount <= 0) return null;
 
-  const rate       = commissionRate(grossAmount);
+  const { rate, label: tier } = getCommissionInfo(grossAmount);
   const commission = grossAmount * rate;
   const sebonFee   = grossAmount * SEBON_RATE;
   const dpCharge   = type === 'SELL' ? DP_CHARGE : 0;
@@ -51,6 +51,7 @@ export function calcFees(grossAmount, type, holdingDays = 0, grossProfit = 0) {
   return {
     grossAmount,
     rate,
+    tier,
     commission,
     sebonFee,
     dpCharge,

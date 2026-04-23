@@ -14,7 +14,7 @@ export default function TradesTable() {
       <table>
         <thead>
           <tr>
-            {['Date', 'Symbol', 'Type', 'Qty', 'Price', 'Fees', 'Net Amount', 'Profit'].map(h => (
+            {['Date', 'Symbol', 'Type', 'Class', 'Qty', 'Price', 'Fees', 'Net Amount', 'Profit'].map(h => (
               <th key={h}>{h}</th>
             ))}
           </tr>
@@ -46,6 +46,7 @@ export default function TradesTable() {
                     {t.type}
                   </span>
                 </td>
+                <td style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t.shareType || 'Secondary'}</td>
                 <td>{t.qty.toLocaleString()}</td>
                 <td style={{ fontFamily: 'var(--mono)' }}>{fmtNPR(t.price)}</td>
                 <td style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--loss)' }}>

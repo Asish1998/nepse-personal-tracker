@@ -56,7 +56,8 @@ function reducer(state, action) {
         gross: qty * price,
         net: fees.netAmount,
         fees: fees.totalFees,
-        buyPrice: holding.buy, // For P/L calculation later
+        buyPrice: holding.buy,
+        shareType: holding.shareType || 'Secondary', // Carry over shareType
       }
 
       // 2. Update holdings

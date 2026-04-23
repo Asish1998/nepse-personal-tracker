@@ -75,37 +75,73 @@ export default function SellForm({ holding, onClose }) {
             </div>
           </div>
 
-          <div style={styles.field}>
-            <label style={styles.label}>Sell Date</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+          <div style={styles.inputGroup}>
+            <div style={styles.field}>
+              <label style={styles.label}>Sell Date</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+            </div>
+            <div style={styles.field}>
+              <label style={styles.label}>Audit Buy Price / sh</label>
+              <input 
+                type="number" 
+                defaultValue={holding.buy} 
+                onChange={e => {
+                  const val = parseFloat(e.target.value)
+                  if (!isNaN(val)) {
+                    // Force refresh preview with new basis
+                    const q = parseFloat(qty)
+                    const p = parseFloat(price)
+                    if (q > 0 && p > 0) {
+                      const { totalCost: buyBasis } = effectiveBuyCost(q, val)
+                      const grossAmount = q * p
+                      const days = holdingDays(holding.date, date)
+                      const fees = calcFees(grossAmount, 'SELL', days, grossAmount - buyBasis)
+                      setPreview({ fees, days, buyBasis })
+                    }
+                  }
+                }} 
+              />
+            </div>
           </div>
 
           {preview && (
             <div style={styles.preview}>
-              <div style={styles.previewTitle}>Sell Breakdown</div>
+              <div style={styles.previewTitle}>Live Fee Breakdown</div>
               <Row label="Gross Receivable" value={`NPR ${fmtNPR(preview.fees.grossAmount)}`} />
-              <Row label="Broker Commission" value={`- NPR ${fmtNPR(preview.fees.commission)}`} />
-              <Row label="SEBON Fee"         value={`- NPR ${fmtNPR(preview.fees.sebonFee)}`} />
-              <Row label="DP Charge"         value={`- NPR ${preview.fees.dpCharge}`} />
+              <Row label={`Commission: ${preview.fees.tier}`} value={`- NPR ${fmtNPR(preview.fees.commission)}`} />
+              <Row label="SEBON Fee (0.015%)"         value={`- NPR ${fmtNPR(preview.fees.sebonFee)}`} />
+              <Row label="DP Charge (Flat)"         value={`- NPR ${preview.fees.dpCharge}`} />
               
+              <div style={styles.divider} />
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <span style={{ fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase' }}>Tax & Holding Info</span>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: preview.days >= 365 ? 'rgba(0,192,118,0.1)' : 'rgba(239,68,68,0.1)', color: preview.days >= 365 ? 'var(--profit)' : 'var(--loss)' }}>
+                  {preview.days} Days ({preview.days >= 365 ? 'Long Term' : 'Short Term'})
+                </span>
+              </div>
+
               {preview.fees.cgt > 0 && (
                 <Row 
-                  label={`CGT (${(preview.fees.cgtRate * 100).toFixed(1)}% on profit)`} 
+                  label={`Capital Gain Tax (${(preview.fees.cgtRate * 100).toFixed(1)}%)`} 
                   value={`- NPR ${fmtNPR(preview.fees.cgt)}`} 
                   color="var(--loss)"
                 />
               )}
 
               <div style={styles.divider} />
-              <Row label="Net Receivable"  value={`NPR ${fmtNPR(preview.fees.netAmount)}`} bold />
+              <Row label="NET PROCEEDS"  value={`NPR ${fmtNPR(preview.fees.netAmount)}`} bold />
               
-              <div style={{ marginTop: 10 }}>
+              <div style={{ marginTop: 12, padding: '10px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: 8, border: '1px solid rgba(99, 102, 241, 0.1)' }}>
                 <Row 
-                  label="Estimated Profit" 
+                  label="REAL NET P/L" 
                   value={`NPR ${fmtNPR(preview.fees.netAmount - preview.buyBasis)}`} 
                   bold 
                   color={preview.fees.netAmount > preview.buyBasis ? 'var(--profit)' : 'var(--loss)'}
                 />
+                <div style={{ fontSize: 9, color: 'var(--muted)', marginTop: 4 }}>
+                  (Net Selling - Original Buy Basis incl. Buy Fees)
+                </div>
               </div>
             </div>
           )}

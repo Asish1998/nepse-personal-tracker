@@ -4,13 +4,14 @@ import Navbar    from '../components/layout/Navbar'
 import Layout    from '../components/layout/Layout'
 import Portfolio from '../components/portfolio/Portfolio'
 import AlertsManager from '../components/alerts/AlertsManager'
+import JournalManager from '../components/journal/JournalManager'
+import WatchlistManager from '../components/watchlist/WatchlistManager'
 
 // keep other stubs for now
-function Journal()   { return <div style={{color:'var(--muted)'}}>Trade Journal — next</div> }
-function Watchlist() { return <div style={{color:'var(--muted)'}}>Watchlist — next</div> }
-function FeeRef()    { return <div style={{color:'var(--muted)'}}>Fee Reference — next</div> }
 
-const sections = { portfolio: Portfolio, journal: Journal, alerts: AlertsManager, watchlist: Watchlist, feeref: FeeRef }
+const sections = { portfolio: Portfolio, journal: JournalManager, alerts: AlertsManager, watchlist: WatchlistManager }
+
+
 
 
 export default function Dashboard() {

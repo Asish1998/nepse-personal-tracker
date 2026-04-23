@@ -74,12 +74,6 @@ export default function Portfolio() {
         <HoldingsTable />
       </div>
 
-      <div className="card" style={{ ...styles.card, marginTop: 24 }}>
-        <div style={styles.cardHeader}>
-          <span style={styles.cardTitle}>Recent Trades</span>
-        </div>
-        <TradesTable />
-      </div>
     </div>
   )
 }
