@@ -1,6 +1,6 @@
 # Personal-Tracker
 
-A personal NEPSE trading dashboard built as a focused 1-day MVP sprint.
+A personal NEPSE trading dashboard 
 Tracks portfolio holdings, logs trades with real broker fee calculations,
 and fires rule-based price alerts.
 
@@ -13,7 +13,6 @@ and fires rule-based price alerts.
 
 ## Tech Stack
 - **Frontend:** React (Vite), React Router, Context API + useReducer
-- **Backend:** Node.js, Express, MongoDB, JWT auth
 - **Fee Engine:** Pure JS utility — SEBON revised rates Jestha 2081 (May 2024)
 
 ## Setup
