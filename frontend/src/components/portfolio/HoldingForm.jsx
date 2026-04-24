@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext'
 import { effectiveBuyCost } from '../../utils/feeEngine'
 import { fmtNPR, today } from '../../utils/formatters'
 
-const empty = { sym: '', qty: '', buy: '', cur: '', date: today(), shareType: 'Secondary' }
+const empty = { sym: '', qty: '', buy: '', cur: '', date: today(), shareType: 'Secondary', reason: '' }
 
 function FeeRow({ label, value, bold, sub }) {
   return (
@@ -60,6 +60,10 @@ export default function HoldingForm({ onClose }) {
     const qty = parseFloat(form.qty)
     const buy = parseFloat(form.buy)
     if (!form.sym || !qty || !buy) return alert('Symbol, quantity and buy price are required.')
+    
+    // Fallback net cost if preview isn't rendered
+    const netCost = preview ? preview.totalCost : qty * buy
+
     dispatch({
       type: 'ADD_HOLDING',
       payload: { 
@@ -69,7 +73,9 @@ export default function HoldingForm({ onClose }) {
         buy, 
         cur: parseFloat(form.cur) || buy, 
         date: form.date,
-        shareType: form.shareType 
+        shareType: form.shareType,
+        reason: form.reason || '',
+        netCost
       },
     })
     setForm(empty)
@@ -83,11 +89,15 @@ export default function HoldingForm({ onClose }) {
           { label: 'Symbol',           field: 'sym',  type: 'text',   ph: 'NEPSE' },
           { label: 'Quantity',         field: 'qty',  type: 'number', ph: '0' },
           { label: 'Buy Price / sh',   field: 'buy',  type: 'number', ph: '' },
-          { label: 'Current Price / sh', field: 'cur', type: 'number', ph: '' },
+          { label: 'Live NEPSE Price', field: 'cur', type: 'number', ph: 'Auto' },
           { label: 'Buy Date',         field: 'date', type: 'date',   ph: '' },
           { label: 'Share Type',       field: 'shareType', type: 'select', options: ['Secondary', 'IPO', 'Right', 'Bonus'] },
+          { label: 'Reason / Strategy', field: 'reason', type: 'textarea', ph: 'e.g. Fundamental analysis, Breakout logic, Emotional state...' },
         ].map(({ label, field, type, ph, options }) => (
-          <div key={field} style={{ position: 'relative' }}>
+          <div key={field} style={{ 
+            position: 'relative', 
+            ...(field === 'reason' ? { gridColumn: '1 / -1', marginTop: '8px' } : {}) 
+          }}>
             <label style={styles.label}>{label}</label>
             {type === 'select' ? (
               <select 
@@ -97,12 +107,34 @@ export default function HoldingForm({ onClose }) {
               >
                 {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
               </select>
+            ) : type === 'textarea' ? (
+              <textarea
+                placeholder={ph}
+                value={form[field]}
+                onChange={e => set(field, e.target.value)}
+                style={{ 
+                  width: '100%', 
+                  minHeight: '80px', 
+                  padding: '12px', 
+                  borderRadius: 'var(--radius)', 
+                  border: '1px solid var(--border)', 
+                  background: 'var(--bg-main)', 
+                  color: 'var(--text-main)', 
+                  resize: 'vertical', 
+                  fontFamily: 'inherit',
+                  fontSize: 13
+                }}
+              />
             ) : (
               <input
                 type={type}
                 placeholder={ph}
                 value={form[field]}
-                style={field === 'sym' ? { textTransform: 'uppercase' } : {}}
+                disabled={field === 'cur'}
+                style={{
+                  ...(field === 'sym' ? { textTransform: 'uppercase' } : {}),
+                  ...(field === 'cur' ? { background: 'var(--bg-main)', color: 'var(--text-muted)' } : {})
+                }}
                 onFocus={() => { if (field === 'sym') setShowList(true) }}
                 onBlur={() => { if (field === 'sym') listHideRef.current = setTimeout(() => setShowList(false), 150) }}
                 onInput={e => {
@@ -170,7 +202,7 @@ const styles = {
     position: 'relative',
     zIndex: 10
   },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 12 },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 16, rowGap: 18, marginBottom: 16 },
   label: { display: 'block', fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 },
   suggestionBox: { 
     position: 'absolute', 

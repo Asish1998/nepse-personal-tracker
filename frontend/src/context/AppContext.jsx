@@ -3,15 +3,8 @@ import { createContext, useContext, useReducer, useEffect } from 'react'
 const AppContext = createContext(null)
 
 const initialState = {
-  holdings: [
-    { id: 1, sym: 'NABIL', qty: 50,  buy: 1240, cur: 1380, date: '2024-11-01' },
-    { id: 2, sym: 'NICA',  qty: 100, buy: 890,  cur: 820,  date: '2024-12-05' },
-    { id: 3, sym: 'NLIC',  qty: 30,  buy: 2100, cur: 2450, date: '2024-10-15' },
-  ],
-  trades: [
-    { id: 4, sym: 'NABIL', type: 'BUY', price: 1240, qty: 50,  date: '2024-11-01', notes: 'Breakout above 1200 resistance.', gross: 62000,  net: 62221.30 },
-    { id: 5, sym: 'NICA',  type: 'BUY', price: 890,  qty: 100, date: '2024-12-05', notes: 'Oversold bounce. Banking rotation.', gross: 89000, net: 89345.35 },
-  ],
+  holdings: [],
+  trades: [],
   importedHoldings: [],
   alerts:    [],
   watchlist: ['NTC', 'SBI', 'UPPER'],
@@ -65,9 +58,35 @@ function reducer(state, action) {
 
   switch (action.type) {
 
-    // ── Holdings ──────────────────────────────────────
-    case 'ADD_HOLDING':
-      return { ...state, holdings: mergeHoldings(state.holdings, [action.payload]) }
+    case 'ADD_HOLDING': {
+      const isManualAdd = !!action.payload.reason || action.payload.netCost !== undefined
+      
+      const nextHoldings = mergeHoldings(state.holdings, [action.payload])
+      
+      // Hook into Trade Journal engine for manual additions to enforce discipline
+      if (isManualAdd) {
+        const newTrade = {
+          id: Date.now() + Math.random(),
+          sym: action.payload.sym,
+          type: 'BUY',
+          qty: action.payload.qty,
+          price: action.payload.buy,
+          date: action.payload.date,
+          notes: action.payload.reason || 'No strategy provided.',
+          gross: action.payload.qty * action.payload.buy,
+          net: action.payload.netCost || (action.payload.qty * action.payload.buy),
+          fees: action.payload.netCost ? (action.payload.netCost - (action.payload.qty * action.payload.buy)) : 0,
+          shareType: action.payload.shareType || 'Secondary'
+        }
+        return { 
+          ...state, 
+          holdings: nextHoldings,
+          trades: [newTrade, ...state.trades]
+        }
+      }
+
+      return { ...state, holdings: nextHoldings }
+    }
     case 'SET_HOLDINGS':
       return { ...state, holdings: action.payload }
     case 'ADD_HOLDINGS_BULK':
@@ -89,6 +108,18 @@ function reducer(state, action) {
             : h
         ),
       }
+    case 'UPDATE_HOLDINGS_PRICES_BULK': {
+      let changed = false
+      const nextHoldings = state.holdings.map(h => {
+        const update = action.payload[h.sym]
+        if (update && update !== h.cur) {
+          changed = true
+          return { ...h, cur: update, prev: h.cur }
+        }
+        return h
+      })
+      return changed ? { ...state, holdings: nextHoldings } : state
+    }
     case 'SELL_HOLDING': {
       const { holdingId, qty, price, date, fees } = action.payload
       const holding = state.holdings.find(h => h.id === holdingId)
@@ -162,7 +193,7 @@ function reducer(state, action) {
   }
 }
 
-const STORAGE_KEY = 'nepse_portfolio_data'
+const STORAGE_KEY = 'nepse_base_v2'
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState, (initial) => {
@@ -247,6 +278,38 @@ export function AppProvider({ children }) {
       Notification.requestPermission()
     }
   }, [])
+
+  // ── Holding Price Polling Logic ───────────────────
+  useEffect(() => {
+    if (state.holdings.length === 0) return
+
+    const fetchPrices = async () => {
+      try {
+        const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
+        const res = await fetch(`${API_BASE}/symbols`)
+        if (!res.ok) return
+        const symbolsData = await res.json()
+        
+        const priceMap = {}
+        for (const item of symbolsData) {
+          const sym = (item.symbol || item.sym || '').toUpperCase()
+          const ltp = item.ltp ?? item.price
+          if (sym && ltp) {
+            priceMap[sym] = parseFloat(ltp.toString().replace(/[^\d.-]/g, ''))
+          }
+        }
+        
+        dispatch({ type: 'UPDATE_HOLDINGS_PRICES_BULK', payload: priceMap })
+      } catch (err) { /* silent fail on network errors */ }
+    }
+
+    // Ping prices immediately on mount/load
+    fetchPrices()
+    
+    // Auto-update prices every 30 seconds while the app stays open
+    const id = setInterval(fetchPrices, 30_000)
+    return () => clearInterval(id)
+  }, [state.holdings.length])
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
