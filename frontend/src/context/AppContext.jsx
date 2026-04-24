@@ -12,6 +12,7 @@ const initialState = {
     { id: 4, sym: 'NABIL', type: 'BUY', price: 1240, qty: 50,  date: '2024-11-01', notes: 'Breakout above 1200 resistance.', gross: 62000,  net: 62221.30 },
     { id: 5, sym: 'NICA',  type: 'BUY', price: 890,  qty: 100, date: '2024-12-05', notes: 'Oversold bounce. Banking rotation.', gross: 89000, net: 89345.35 },
   ],
+  importedHoldings: [],
   alerts:    [],
   watchlist: ['NTC', 'SBI', 'UPPER'],
   emailConfig: {
@@ -24,20 +25,68 @@ const initialState = {
 }
 
 function reducer(state, action) {
+  // Helper to merge holdings with Weighted Average Cost of Capital (WACC)
+  const mergeHoldings = (existing, incoming) => {
+    const merged = [...existing]
+    incoming.forEach(newH => {
+      const symStr = newH.sym.toUpperCase()
+      const index = merged.findIndex(exist => exist.sym.toUpperCase() === symStr)
+      if (index !== -1) {
+        const exist = merged[index]
+        const totalQty = exist.qty + newH.qty
+        
+        // Calculate WACC
+        const existInv = (exist.inv !== undefined && exist.isImported) ? exist.inv : (exist.qty * exist.buy)
+        const newInv = (newH.inv !== undefined && newH.isImported) ? newH.inv : (newH.qty * newH.buy)
+        const avgBuy = (existInv + newInv) / totalQty
+        
+        // Keep most recently added/updated current price if valid
+        const nextCur = (newH.cur && !isNaN(newH.cur) && newH.cur > 0) ? newH.cur : exist.cur
+
+        merged[index] = {
+          ...exist,
+          qty: totalQty,
+          buy: avgBuy,
+          cur: nextCur,
+          inv: existInv + newInv,
+          isImported: exist.isImported || newH.isImported
+        }
+
+        // Aggregate Excel truth data if present
+        if (newH.mkt !== undefined) merged[index].mkt = (exist.mkt || (exist.qty * exist.cur)) + newH.mkt
+        if (newH.pl !== undefined) merged[index].pl = (exist.pl || 0) + newH.pl
+
+      } else {
+        merged.push({ ...newH, sym: symStr })
+      }
+    })
+    return merged
+  }
+
   switch (action.type) {
 
     // ── Holdings ──────────────────────────────────────
     case 'ADD_HOLDING':
-      return { ...state, holdings: [...state.holdings, action.payload] }
+      return { ...state, holdings: mergeHoldings(state.holdings, [action.payload]) }
     case 'SET_HOLDINGS':
       return { ...state, holdings: action.payload }
+    case 'ADD_HOLDINGS_BULK':
+      return { ...state, holdings: mergeHoldings(state.holdings, action.payload) }
     case 'DELETE_HOLDING':
       return { ...state, holdings: state.holdings.filter(h => h.id !== action.payload) }
+    case 'CLEAR_IMPORTED_HOLDINGS':
+      return { ...state, holdings: state.holdings.filter(h => !h.isImported) }
+    case 'SET_IMPORTED_HOLDINGS':
+      return { ...state, importedHoldings: action.payload }
+    case 'DELETE_IMPORTED_HOLDING':
+      return { ...state, importedHoldings: state.importedHoldings.filter(h => h.id !== action.payload) }
     case 'UPDATE_HOLDING_PRICE':
       return {
         ...state,
         holdings: state.holdings.map(h =>
-          h.id === action.payload.id ? { ...h, cur: action.payload.cur } : h
+          h.sym === action.payload.sym 
+            ? { ...h, cur: action.payload.cur, prev: action.payload.prev || h.prev || action.payload.cur } 
+            : h
         ),
       }
     case 'SELL_HOLDING': {

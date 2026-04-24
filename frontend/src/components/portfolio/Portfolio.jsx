@@ -2,7 +2,6 @@ import { useState, useRef } from 'react'
 import SummaryCards  from './SummaryCards'
 import HoldingForm   from './HoldingForm'
 import HoldingsTable from './HoldingsTable'
-import TradesTable   from '../journal/TradesTable'
 import PortfolioChart from './PortfolioChart'
 import { useApp } from '../../context/AppContext'
 import { exportHoldingsToExcel, importHoldingsFromExcel } from '../../utils/excelUtils'
@@ -26,8 +25,8 @@ export default function Portfolio() {
     try {
       const imported = await importHoldingsFromExcel(file)
       if (imported.length > 0) {
-        if (confirm(`Do you want to replace your current ${state.holdings.length} holdings with ${imported.length} holdings from the file?`)) {
-          dispatch({ type: 'SET_HOLDINGS', payload: imported })
+        if (confirm(`Detected ${imported.length} stocks. Would you like to APPEND them to your current portfolio?`)) {
+          dispatch({ type: 'ADD_HOLDINGS_BULK', payload: imported })
         }
       } else {
         alert('No valid data found in file.')
@@ -60,6 +59,15 @@ export default function Portfolio() {
             />
             <button className="btn-secondary" style={{ fontSize: 13, padding: '8px 16px' }} onClick={handleImportClick}>Import</button>
             <button className="btn-secondary" style={{ fontSize: 13, padding: '8px 16px' }} onClick={handleExport}>Export</button>
+            {state.holdings.some(h => h.isImported) && (
+              <button 
+                className="btn-danger" 
+                style={{ fontSize: 13, padding: '8px 16px', background: 'none', border: '1px solid var(--loss)', color: 'var(--loss)' }} 
+                onClick={() => confirm('Clear all imported data? Manual holdings will remain.') && dispatch({ type: 'CLEAR_IMPORTED_HOLDINGS' })}
+              >
+                Clear Imported
+              </button>
+            )}
             <button
               className={showForm ? 'btn-secondary' : 'btn-accent'}
               style={{ fontSize: 13, padding: '8px 16px' }}

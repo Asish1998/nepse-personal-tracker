@@ -15,6 +15,7 @@ function FeeRow({ label, value, bold, sub }) {
 }
 
 export default function HoldingForm({ onClose }) {
+  const { dispatch } = useApp()
   const [form, setForm]   = useState(empty)
   const [symbols, setSymbols] = useState([])
   const [showList, setShowList] = useState(false)
@@ -75,9 +76,6 @@ export default function HoldingForm({ onClose }) {
     onClose()
   }
 
-  const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  const boxBg = isDark ? '#0f172a' : '#ffffff'
-
   return (
     <div style={styles.wrap}>
       <div style={styles.grid}>
@@ -115,7 +113,7 @@ export default function HoldingForm({ onClose }) {
               />
             )}
             {field === 'sym' && showList && symbols.length > 0 && (
-              <div style={{ ...styles.suggestionBox, background: boxBg }} onMouseDown={() => clearTimeout(listHideRef.current)}>
+              <div style={styles.suggestionBox} onMouseDown={() => clearTimeout(listHideRef.current)}>
                 {symbols
                   .filter(s => {
                     const q = (form.sym || '').toUpperCase()
@@ -123,14 +121,14 @@ export default function HoldingForm({ onClose }) {
                   })
                   .slice(0, 50)
                   .map(s => (
-                    <div key={s.symbol} style={styles.suggestionRow} onMouseDown={e => {
+                    <div key={s.symbol} style={styles.suggestionRow} className="autocomplete-row" onMouseDown={e => {
                       e.preventDefault()
                       set({ sym: s.symbol, cur: s.ltp || '' })
                       setShowList(false)
                     }}>
-                      <div style={{ fontFamily: 'var(--mono)', width: 70, fontWeight: 700 }}>{s.symbol}</div>
-                      <div style={{ color: 'var(--text-muted)', flex: 1, fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
-                      <div style={{ fontFamily: 'var(--mono)', fontWeight: 600 }}>{s.ltp ?? '-'}</div>
+                      <div style={{ fontFamily: 'var(--mono)', width: 70, fontWeight: 700, color: 'var(--primary)' }}>{s.symbol}</div>
+                      <div style={{ color: 'var(--text-muted)', flex: 1, fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                      <div style={{ fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--text-main)' }}>{s.ltp ?? '-'}</div>
                     </div>
                   ))}
               </div>
@@ -163,7 +161,7 @@ export default function HoldingForm({ onClose }) {
 
 const styles = {
   wrap: { 
-    background: 'var(--bg-glass)', 
+    background: 'var(--bg-card)', 
     border: '1px solid var(--border)', 
     borderRadius: '16px', 
     padding: '24px', 
@@ -186,7 +184,8 @@ const styles = {
     border: '2px solid var(--primary)',
     boxShadow: 'var(--shadow-lg)',
     zIndex: 9999,
-    marginTop: '8px'
+    marginTop: '8px',
+    background: 'var(--bg-card)'
   },
   suggestionRow: { 
     display: 'flex', 
@@ -194,9 +193,10 @@ const styles = {
     padding: '10px 14px', 
     cursor: 'pointer', 
     borderBottom: '1px solid var(--border)',
-    alignItems: 'center'
+    alignItems: 'center',
+    background: 'var(--bg-card)'
   },
-  feeBox: { background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '16px', marginBottom: '20px', border: '1px solid var(--border)' },
+  feeBox: { background: 'var(--bg-main)', borderRadius: '12px', padding: '16px', marginBottom: '20px', border: '1px solid var(--border)' },
   feeTitle: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', marginBottom: 12, color: 'var(--text-muted)', letterSpacing: '0.05em' },
   divider: { height: 1, background: 'var(--border)', margin: '8px 0' },
   feeRows: { display: 'flex', flexDirection: 'column' }

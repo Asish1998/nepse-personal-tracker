@@ -5,13 +5,16 @@ const tabs = [
   { key: 'journal',    label: 'Trade Journal'  },
   { key: 'alerts',     label: 'Alerts'         },
   { key: 'watchlist',  label: 'Watchlist'      },
+  { key: 'charts',     label: 'Technical Charts'},
 ]
 
 export default function Navbar({ active, onChange }) {
   return (
-    <header className="glass" style={styles.header}>
+    <header style={styles.header}>
       <div style={styles.brand}>
-        <div style={styles.logoGlow}></div>
+        <div style={styles.logoBox}>
+          <span style={{ color: 'white', fontWeight: 800, fontSize: 13, letterSpacing: '0.05em' }}>AK</span>
+        </div>
         <div style={styles.brandText}>
           <div style={styles.brandName}>Personal Tracker</div>
           <div style={styles.brandSub}>NEPSE · Portfolio Manager</div>
@@ -42,21 +45,25 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: '16px',
-    boxShadow: 'var(--shadow)',
+    background: 'var(--bg-card)',
+    borderRadius: 'var(--radius)',
+    border: '1px solid var(--border)',
+    boxShadow: 'var(--shadow-flat)',
   },
   brand: {
     display: 'flex',
     alignItems: 'center',
     gap: 12,
   },
-  logoGlow: {
+  logoBox: {
     width: 32,
     height: 32,
-    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-    borderRadius: '10px',
-    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
-    position: 'relative',
+    background: 'var(--primary)',
+    borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
   },
   brandText: {
     display: 'flex',

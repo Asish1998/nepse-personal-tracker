@@ -1,16 +1,20 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { effectiveBuyCost } from '../../utils/feeEngine'
 import { fmtNPR } from '../../utils/formatters'
 import SellForm from './SellForm'
+import EditForm from './EditForm'
 
 export default function HoldingsTable() {
   const { state, dispatch } = useApp()
   const [sellingHolding, setSellingHolding] = useState(null)
+  const [editingHolding, setEditingHolding] = useState(null)
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
 
-  function updatePrice(id, val) {
+  function updatePrice(sym, val) {
     const cur = parseFloat(val)
-    if (!isNaN(cur)) dispatch({ type: 'UPDATE_HOLDING_PRICE', payload: { id, cur } })
+    if (!isNaN(cur)) dispatch({ type: 'UPDATE_HOLDING_PRICE', payload: { sym, cur } })
   }
 
   function deleteHolding(id) {
@@ -19,49 +23,130 @@ export default function HoldingsTable() {
     }
   }
 
-  if (!state.holdings.length) {
-    return <p style={{ color: 'var(--muted)', fontSize: 13, padding: '20px 0' }}>No holdings yet. Add your first one above.</p>
+  const requestSort = (key) => {
+    let direction = 'asc'
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
   }
+
+  if (!state.holdings.length) {
+    return <p style={{ color: 'var(--text-muted)', fontSize: 13, padding: '20px 0' }}>No holdings yet. Add your first one above.</p>
+  }
+
+  // Phase 1: Pre-calculate all financial fields safely so we can sort by them
+  const processedHoldings = state.holdings.map(h => {
+    const investment = h.isImported ? (h.inv || (h.qty * h.buy)) : effectiveBuyCost(h.qty, h.buy).totalCost
+    const mktValue = h.isImported ? (h.mkt || (h.qty * h.cur)) : (h.qty * h.cur)
+    const pl = h.isImported ? (h.pl || (mktValue - investment)) : (mktValue - investment)
+    const prev = h.prev || h.cur
+    const changeVal = h.cur - prev
+    const dailyPL = changeVal * h.qty
+    return { ...h, investment, mktValue, pl, changeVal, dailyPL }
+  })
+
+  // Phase 2: Sort the processed array if a key is active
+  let sortedHoldings = [...processedHoldings]
+  if (sortConfig.key !== null) {
+    sortedHoldings.sort((a, b) => {
+      let aVal = a[sortConfig.key]
+      let bVal = b[sortConfig.key]
+      
+      if (typeof aVal === 'string') {
+        aVal = aVal.toLowerCase()
+        bVal = bVal.toLowerCase()
+      }
+      
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
+  }
+
+  const columns = [
+    { label: 'S.N.', key: null },
+    { label: 'Symbol', key: 'sym' },
+    { label: 'Qty.', key: 'qty' },
+    { label: 'Rate', key: 'buy' },
+    { label: 'Investment', key: 'investment' },
+    { label: 'Price', key: 'cur' },
+    { label: 'Change', key: 'changeVal' },
+    { label: 'Daily', key: 'dailyPL' },
+    { label: 'Overall', key: 'pl' },
+    { label: 'Market Value', key: 'mktValue' },
+    { label: 'Actions', key: null },
+  ]
 
   return (
     <div style={{ overflowX: 'auto' }}>
       <table>
         <thead>
           <tr>
-            {['Symbol', 'Qty', 'Buy/sh', 'Eff/sh', 'Now', 'Eff. Cost', 'Cur. Value', 'P/L', 'P/L %', 'Actions'].map(h => (
-              <th key={h}>{h}</th>
+            {columns.map(col => (
+              <th 
+                key={col.label} 
+                onClick={() => col.key && requestSort(col.key)}
+                style={{ cursor: col.key ? 'pointer' : 'default', userSelect: 'none', transition: 'color 0.2s' }}
+                title={col.key ? `Sort by ${col.label}` : undefined}
+              >
+                {col.label}
+                {sortConfig.key === col.key && (
+                  <span style={{ fontSize: 9, marginLeft: 4, display: 'inline-block', transform: sortConfig.direction === 'asc' ? 'translateY(-1px)' : 'translateY(1px)' }}>
+                    {sortConfig.direction === 'asc' ? '▲' : '▼'}
+                  </span>
+                )}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {state.holdings.map(h => {
-            const { totalCost, effPricePerShare } = effectiveBuyCost(h.qty, h.buy)
-            const curValue = h.qty * h.cur
-            const pl       = curValue - totalCost
-            const plPct    = (pl / totalCost) * 100
-            const color    = pl >= 0 ? 'var(--profit)' : 'var(--loss)'
-            const sign     = pl >= 0 ? '+' : ''
+          {sortedHoldings.map((h, index) => {
+            const plColor = h.pl >= 0 ? 'var(--profit)' : 'var(--loss)'
 
             return (
               <tr key={h.id}>
-                <td style={{ fontFamily: 'var(--mono)', fontWeight: 600 }}>{h.sym}</td>
+                <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{index + 1}</td>
+                <td style={{ fontFamily: 'var(--mono)', fontWeight: 700 }}>
+                  <Link 
+                    to={`/stock/${h.sym}`} 
+                    target="_blank" 
+                    style={{ color: 'var(--primary)', textDecoration: 'none', borderBottom: '1px dashed var(--border-strong)', paddingBottom: 2 }}
+                    title="View Full Details"
+                  >
+                    {h.sym}
+                  </Link>
+                </td>
                 <td>{h.qty.toLocaleString()}</td>
                 <td style={{ fontFamily: 'var(--mono)' }}>{fmtNPR(h.buy)}</td>
-                <td style={{ fontFamily: 'var(--mono)', color: 'var(--muted)' }} title="Effective price after buy fees">
-                  {fmtNPR(effPricePerShare)}
-                </td>
+                <td style={{ fontWeight: 700, fontFamily: 'var(--mono)' }}>{fmtNPR(h.investment, 0)}</td>
                 <td>
                   <input
                     type="number"
                     defaultValue={h.cur}
-                    onBlur={e => updatePrice(h.id, e.target.value)}
-                    style={{ width: 80, textAlign: 'right', fontFamily: 'var(--mono)', padding: '3px 6px', fontSize: 12 }}
+                    onBlur={e => updatePrice(h.sym, e.target.value)}
+                    className="mono price-input"
+                    style={{ 
+                      width: 80, 
+                      background: 'transparent', 
+                      border: 'none', 
+                      borderBottom: '1px solid transparent',
+                      padding: '2px 0', 
+                      fontSize: 13,
+                      color: 'inherit'
+                    }}
                   />
                 </td>
-                <td style={{ fontFamily: 'var(--mono)' }}>{fmtNPR(totalCost, 0)}</td>
-                <td style={{ fontFamily: 'var(--mono)' }}>{fmtNPR(curValue, 0)}</td>
-                <td style={{ fontFamily: 'var(--mono)', color }}>{sign}{fmtNPR(pl, 0)}</td>
-                <td style={{ color }}>{sign}{plPct.toFixed(2)}%</td>
+                <td style={{ color: h.changeVal >= 0 ? 'var(--profit)' : 'var(--loss)', fontWeight: 600 }}>
+                  {h.changeVal > 0 ? '+' : ''}{fmtNPR(h.changeVal)}
+                </td>
+                <td style={{ color: h.dailyPL >= 0 ? 'var(--profit)' : 'var(--loss)', fontWeight: 600 }}>
+                  {h.dailyPL > 0 ? '+' : ''}{fmtNPR(h.dailyPL, 0)}
+                </td>
+                <td style={{ fontWeight: 800, color: plColor }}>
+                  {h.pl > 0 ? '+' : ''}{fmtNPR(h.pl, 0)}
+                </td>
+                <td style={{ fontWeight: 700 }}>{fmtNPR(h.mktValue, 0)}</td>
                 <td>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button
@@ -70,6 +155,13 @@ export default function HoldingsTable() {
                       onClick={() => setSellingHolding(h)}
                     >
                       Sell
+                    </button>
+                    <button
+                      className="btn-secondary"
+                      style={{ padding: '3px 9px', fontSize: 11, borderColor: 'var(--border-strong)' }}
+                      onClick={() => setEditingHolding(h)}
+                    >
+                      Edit
                     </button>
                     <button
                       className="btn-danger"
@@ -90,6 +182,13 @@ export default function HoldingsTable() {
         <SellForm 
           holding={sellingHolding} 
           onClose={() => setSellingHolding(null)} 
+        />
+      )}
+      
+      {editingHolding && (
+        <EditForm 
+          holding={editingHolding} 
+          onClose={() => setEditingHolding(null)} 
         />
       )}
     </div>

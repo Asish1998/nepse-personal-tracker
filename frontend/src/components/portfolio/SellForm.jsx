@@ -159,23 +159,23 @@ export default function SellForm({ holding, onClose }) {
 function Row({ label, value, bold, color }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', margin: '4px 0', fontSize: 13 }}>
-      <span style={{ color: 'var(--muted)' }}>{label}</span>
-      <span style={{ fontWeight: bold ? 600 : 400, color: color || 'var(--text)', fontFamily: 'var(--mono)' }}>{value}</span>
+      <span style={{ color: 'var(--text-muted)' }}>{label}</span>
+      <span style={{ fontWeight: bold ? 600 : 400, color: color || 'var(--text-main)', fontFamily: 'var(--mono)' }}>{value}</span>
     </div>
   )
 }
 
 const styles = {
-  overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
-  modal:   { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: 400, overflow: 'hidden' },
-  header:  { padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modal:   { background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', width: '90%', maxWidth: 400, overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' },
+  header:  { padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card)' },
   content: { padding: 20 },
   inputGroup: { display: 'flex', gap: 12, marginBottom: 16 },
   field:   { flex: 1, marginBottom: 16 },
-  label:   { display: 'block', fontSize: 11, color: 'var(--muted)', marginBottom: 6, textTransform: 'uppercase' },
-  closeBtn: { background: 'none', border: 'none', color: 'var(--muted)', fontSize: 24, cursor: 'pointer' },
-  preview: { background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius)', padding: 12, marginBottom: 20, border: '1px solid var(--border)' },
-  previewTitle: { fontSize: 10, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 10 },
+  label:   { display: 'block', fontSize: 11, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', fontWeight: 600 },
+  closeBtn: { background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 24, cursor: 'pointer' },
+  preview: { background: 'var(--bg-main)', borderRadius: 'var(--radius)', padding: '16px', marginBottom: '20px', border: '1px solid var(--border)' },
+  previewTitle: { fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 10 },
   divider: { height: 1, background: 'var(--border)', margin: '10px 0' },
   actions: { display: 'flex', gap: 10 },
 }
