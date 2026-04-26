@@ -6,6 +6,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import StockDetails from './pages/StockDetails'
 
+import SecurityGateway from './components/auth/SecurityGateway'
+
 function ProtectedLayout() {
   const { user } = useAuth()
   
@@ -17,6 +19,7 @@ function ProtectedLayout() {
   // This ensures a full remount and proper data isolation between accounts
   return (
     <AppProvider key={user.id} storageKey={`nepse_v2_${user.id}`}>
+      <SecurityGateway />
       <Outlet />
     </AppProvider>
   )

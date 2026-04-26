@@ -8,14 +8,14 @@ import JournalManager from '../components/journal/JournalManager'
 import WatchlistManager from '../components/watchlist/WatchlistManager'
 import TechnicalChart from '../components/charts/TechnicalChart'
 import IntelligenceDashboard from '../components/intelligence/IntelligenceDashboard'
+import ManagerHub from '../components/layout/ManagerHub'
+import TickerTape from '../components/layout/TickerTape'
 
 // keep other stubs for now
 
 const sections = { 
   portfolio: Portfolio, 
-  journal: JournalManager, 
-  alerts: AlertsManager, 
-  watchlist: WatchlistManager,
+  hub: ManagerHub,
   charts: TechnicalChart,
   intelligence: IntelligenceDashboard
 }
@@ -30,6 +30,7 @@ export default function Dashboard() {
   return (
     <>
       <Navbar active={active} onChange={setActive} />
+      <TickerTape />
       <Layout>
         <Section />
       </Layout>

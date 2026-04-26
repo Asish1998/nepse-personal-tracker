@@ -3,8 +3,8 @@ import SummaryCards  from './SummaryCards'
 import HoldingForm   from './HoldingForm'
 import HoldingsTable from './HoldingsTable'
 import PortfolioChart from './PortfolioChart'
+import HoldingIntelligence from './HoldingIntelligence'
 import { useApp } from '../../context/AppContext'
-import { exportHoldingsToExcel, importHoldingsFromExcel } from '../../utils/excelUtils'
 
 export default function Portfolio() {
   const { state, dispatch } = useApp()
@@ -41,6 +41,8 @@ export default function Portfolio() {
     <div>
       <SummaryCards />
       
+      <HoldingIntelligence />
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 24, marginBottom: 24 }}>
         <PortfolioChart />
         {/* Placeholder for future charts or stats */}

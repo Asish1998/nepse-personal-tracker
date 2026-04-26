@@ -1,4 +1,5 @@
-import { createContext, useContext, useReducer, useEffect } from 'react'
+import { createContext, useContext, useReducer, useEffect, useState } from 'react'
+import { encryptData, decryptData } from '../utils/cryptoUtils'
 
 const AppContext = createContext(null)
 
@@ -17,7 +18,10 @@ const initialState = {
   },
   aiConfig: {
     geminiKey: ''
-  }
+  },
+  familyBOIDs: [],
+  isLocked: false,
+  masterPin: null
 }
 
 function reducer(state, action) {
@@ -114,6 +118,22 @@ function reducer(state, action) {
             : h
         ),
       }
+    case 'UPDATE_HOLDING': {
+      const { id, updates } = action.payload
+      return {
+        ...state,
+        holdings: state.holdings.map(h => {
+          if (h.id !== id) return h
+          const next = { ...h, ...updates }
+          // If qty or buy was changed, recalculate total investment (inv)
+          // This ensures P/L calculations remain mathematically correct
+          next.inv = next.qty * next.buy
+          // Reset imported status if user manual edits this record
+          next.isImported = false
+          return next
+        })
+      }
+    }
     case 'UPDATE_HOLDINGS_PRICES_BULK': {
       let changed = false
       const nextHoldings = state.holdings.map(h => {
@@ -200,6 +220,31 @@ function reducer(state, action) {
     case 'UPDATE_AI_CONFIG':
       return { ...state, aiConfig: { ...state.aiConfig, ...action.payload } }
 
+    case 'SET_BOIDS':
+      return { ...state, familyBOIDs: action.payload }
+    case 'ADD_BOID':
+      return { ...state, familyBOIDs: [...state.familyBOIDs, { id: Date.now(), ...action.payload }] }
+    case 'REMOVE_BOID':
+      return { ...state, familyBOIDs: state.familyBOIDs.filter(b => b.id !== action.payload) }
+    case 'UPDATE_BOID':
+      return {
+        ...state,
+        familyBOIDs: state.familyBOIDs.map(b => b.id === action.payload.id ? { ...b, ...action.payload } : b)
+      }
+
+    case 'SET_PIN':
+      return { ...state, masterPin: action.payload, isLocked: false }
+    case 'LOCK':
+      return { ...state, isLocked: true }
+    case 'UNLOCK': {
+      try {
+        const saved = localStorage.getItem('nepse_base_v2')
+        const decrypted = decryptData(saved, action.payload)
+        return { ...decrypted, masterPin: action.payload, isLocked: false }
+      } catch (e) {
+        return { ...state, isLocked: true }
+      }
+    }
     default:
       return state
   }
@@ -210,27 +255,42 @@ export function AppProvider({ children, storageKey = 'nepse_base_v2' }) {
     try {
       const saved = localStorage.getItem(storageKey)
       if (!saved) return initial
-      const parsed = JSON.parse(saved)
-      // Merge logic: ensure new fields like emailConfig exist even for old users
-      return {
-        ...initial,
-        ...parsed,
-        emailConfig: { ...initial.emailConfig, ...(parsed.emailConfig || {}) },
-        aiConfig: { ...initial.aiConfig, ...(parsed.aiConfig || {}) }
+
+      // Try to decrypt without a PIN (for unencrypted data)
+      try {
+        const parsed = decryptData(saved, null)
+        return {
+          ...initial,
+          ...parsed,
+          emailConfig: { ...initial.emailConfig, ...(parsed.emailConfig || {}) },
+          aiConfig: { ...initial.aiConfig, ...(parsed.aiConfig || {}) },
+          familyBOIDs: parsed.familyBOIDs || [],
+          isLocked: false
+        }
+      } catch (e) {
+        // Data is likely encrypted
+        return { ...initial, isLocked: true }
       }
     } catch {
       return initial
     }
   })
 
+  // ── Persistence Logic ─────────────────────────────
+  useEffect(() => {
+    if (state.isLocked) return // Don't overwrite with empty locked state
+    const encrypted = encryptData(state, state.masterPin)
+    localStorage.setItem(storageKey, encrypted)
+  }, [state, storageKey])
+
   // ── Alert Monitoring Logic ────────────────────────
   useEffect(() => {
-    const activeAlerts = state.alerts.filter(a => a.status === 'ACTIVE')
+    if (state.isLocked) return
+    const activeAlerts = (state.alerts || []).filter(a => a.status === 'ACTIVE')
     if (activeAlerts.length === 0) return
 
     const id = setInterval(async () => {
       const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
-
       for (const alert of activeAlerts) {
         try {
           const res = await fetch(`${API_BASE}/price?symbol=${encodeURIComponent(alert.sym)}`)
@@ -241,58 +301,18 @@ export function AppProvider({ children, storageKey = 'nepse_base_v2' }) {
           if (ltp) {
             const triggered = alert.type === 'ABOVE' ? ltp >= alert.target : ltp <= alert.target
             if (triggered) {
-              dispatch({
-                type: 'UPDATE_ALERT',
-                payload: { id: alert.id, status: 'TRIGGERED', triggeredAt: new Date().toISOString() }
-              })
-
-              // 1. Browser Notification
-              if (Notification.permission === 'granted') {
-                new Notification(`Signal Triggered: ${alert.sym}`, {
-                  body: `${alert.sym} has reached ${ltp}. (Target: ${alert.target})`
-                })
-              }
-
-              // 2. EmailJS Notification
-              if (state.emailConfig.enabled && state.emailConfig.serviceId) {
-                const { serviceId, templateId, publicKey, toEmail } = state.emailConfig
-                fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    service_id: serviceId,
-                    template_id: templateId,
-                    user_id: publicKey,
-                    template_params: {
-                      to_email: toEmail,
-                      subject: `NEPSE ALERT: ${alert.sym} Triggered!`,
-                      symbol: alert.sym,
-                      type: alert.type,
-                      target: alert.target,
-                      ltp: ltp,
-                      notes: alert.notes || 'None'
-                    }
-                  })
-                }).catch(err => console.error('Email alert failed:', err))
-              }
+              dispatch({ type: 'UPDATE_ALERT', payload: { id: alert.id, status: 'TRIGGERED', triggeredAt: new Date().toISOString() } })
             }
           }
-        } catch (err) { /* silent fail */ }
+        } catch (err) {}
       }
-    }, 60_000) // Check every minute
-
+    }, 60_000)
     return () => clearInterval(id)
-  }, [state.alerts, state.emailConfig])
-
-  useEffect(() => {
-    if (Notification.permission === 'default') {
-      Notification.requestPermission()
-    }
-  }, [])
+  }, [state.alerts, state.isLocked, state.emailConfig])
 
   // ── Holding Price Polling Logic ───────────────────
   useEffect(() => {
-    if (state.holdings.length === 0) return
+    if (state.isLocked || !state.holdings || state.holdings.length === 0) return
 
     const fetchPrices = async () => {
       try {
@@ -300,31 +320,19 @@ export function AppProvider({ children, storageKey = 'nepse_base_v2' }) {
         const res = await fetch(`${API_BASE}/symbols`)
         if (!res.ok) return
         const symbolsData = await res.json()
-
         const priceMap = {}
         for (const item of symbolsData) {
           const sym = (item.symbol || item.sym || '').toUpperCase()
           const ltp = item.ltp ?? item.price
-          if (sym && ltp) {
-            priceMap[sym] = parseFloat(ltp.toString().replace(/[^\d.-]/g, ''))
-          }
+          if (sym && ltp) priceMap[sym] = parseFloat(ltp.toString().replace(/[^\d.-]/g, ''))
         }
-
         dispatch({ type: 'UPDATE_HOLDINGS_PRICES_BULK', payload: priceMap })
-      } catch (err) { /* silent fail on network errors */ }
+      } catch (err) {}
     }
-
-    // Ping prices immediately on mount/load
     fetchPrices()
-
-    // Auto-update prices every 30 seconds while the app stays open
     const id = setInterval(fetchPrices, 30_000)
     return () => clearInterval(id)
-  }, [state.holdings.length])
-
-  useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(state))
-  }, [state, storageKey])
+  }, [state.holdings?.length, state.isLocked])
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

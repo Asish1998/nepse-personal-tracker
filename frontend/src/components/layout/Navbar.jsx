@@ -6,9 +6,7 @@ import AISettingsModal from '../shared/AISettingsModal'
 const tabs = [
   { key: 'portfolio',  label: 'Portfolio'      },
   { key: 'intelligence',label: 'Intelligence ⚡' },
-  { key: 'journal',    label: 'Trade Journal'  },
-  { key: 'alerts',     label: 'Alerts'         },
-  { key: 'watchlist',  label: 'Watchlist'      },
+  { key: 'hub',         label: 'Trading Hub 🛠️' },
   { key: 'charts',     label: 'Technical Charts'},
 ]
 

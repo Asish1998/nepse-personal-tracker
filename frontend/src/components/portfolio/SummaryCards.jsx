@@ -43,6 +43,8 @@ export default function SummaryCards() {
     { profit: 0, fees: 0, buyFees: 0 }
   )
 
+  const totalDividends = state.holdings.reduce((acc, h) => acc + (parseFloat(h.dividends) || 0), 0)
+
   const unrealizedPL = unrealized.value - unrealized.invested
   const totalPL      = unrealizedPL + realized.profit
   const netWorth     = unrealized.value 
