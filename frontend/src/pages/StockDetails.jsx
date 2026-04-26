@@ -1,26 +1,23 @@
-import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import { effectiveBuyCost } from '../utils/feeEngine'
 import { fmtNPR } from '../utils/formatters'
 import Layout from '../components/layout/Layout'
-import TradingViewWidget from '../components/charts/TradingViewWidget'
-import { getFundamentalData } from '../utils/stockData'
 
 export default function StockDetails() {
   const { symbol } = useParams()
   const { state } = useApp()
-  const [activeTab, setActiveTab] = useState('About')
 
   const symUpperCase = symbol?.toUpperCase()
   const holding = state.holdings.find(h => h.sym === symUpperCase)
-  const facts = getFundamentalData(symUpperCase)
 
   if (!holding) {
     return (
       <Layout>
         <div style={{ textAlign: 'center', padding: '100px 0' }}>
           <h2 style={{ color: 'var(--text-muted)' }}>Stock Not Found</h2>
-          <Link to="/" className="btn-primary" style={{ display: 'inline-block', marginTop: 24, textDecoration: 'none' }}>
+          <p style={{ marginTop: 16 }}>No data available for symbol "{symUpperCase}" in your portfolio.</p>
+          <Link to="/" style={{ display: 'inline-block', marginTop: 24, padding: '8px 16px', background: 'var(--primary)', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
             Back to Dashboard
           </Link>
         </div>
@@ -28,127 +25,125 @@ export default function StockDetails() {
     )
   }
 
-  const fundamentalData = [
-    { label: 'Sector', value: facts.sector || holding.sector, color: 'var(--accent)' },
-    { label: 'Shares Outstanding', value: facts.sharesOutstanding?.toLocaleString() || 'N/A' },
-    { label: 'Market Price', value: fmtNPR(holding.cur), color: 'var(--loss)' },
-    { label: '% Change', value: '0 %', color: 'var(--loss)' },
-    { label: '52 Weeks High - Low', value: facts.range52w },
-    { label: '1 Year Yield', value: facts.yield, color: 'var(--profit)' },
-    { label: 'EPS', value: facts.eps },
-    { label: 'P/E Ratio', value: facts.pe },
-    { label: 'Book Value', value: facts.bookValue },
-    { label: 'PBV', value: facts.pbv },
-    { label: '% Dividend', value: facts.dividend, color: 'var(--accent)' },
-  ]
+  // Calculate deep features
+  const investment = holding.isImported ? (holding.inv || (holding.qty * holding.buy)) : effectiveBuyCost(holding.qty, holding.buy).totalCost
+  const mktValue = holding.isImported ? (holding.mkt || (holding.qty * holding.cur)) : (holding.qty * holding.cur)
+  const pl = holding.isImported ? (holding.pl || (mktValue - investment)) : (mktValue - investment)
+  const plPercent = ((pl / investment) * 100).toFixed(2)
+  const breakEven = holding.isImported ? holding.buy : effectiveBuyCost(holding.qty, holding.buy).breakEven
+  
+  const prev = holding.prev || holding.cur
+  const changeVal = holding.cur - prev
+  const dailyPL = changeVal * holding.qty
 
-  const tabContent = {
-    'About': [
-      { label: 'Symbol', value: symUpperCase },
-      { label: 'Company Name', value: holding.name || facts.name || 'Company Profile' },
-      { label: 'Sector', value: facts.sector || holding.sector },
-      { label: 'Listed Shares', value: facts.sharesOutstanding?.toLocaleString() || 'N/A' },
-      { label: 'Paidup Value', value: '100.00' },
-      { label: 'Total Equity Capital', value: facts.sharesOutstanding ? fmtNPR(facts.sharesOutstanding * 100, 0) : 'N/A' },
-    ]
-  }
+  const isProfit = pl >= 0
+  const plColor = isProfit ? 'var(--profit)' : 'var(--loss)'
 
   return (
-    <div style={styles.page}>
-      <nav style={styles.nav}>
-        <div style={styles.navLeft}>
-          <Link to="/" style={styles.backLink}>← TERMINAL</Link>
-          <div style={styles.divider}></div>
-          <h1 style={styles.pageTitle}>{holding.name || symUpperCase}</h1>
-          <span style={styles.symBadge}>{symUpperCase}</span>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Mini App Bar */}
+      <nav style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <Link to="/" style={{ textDecoration: 'none', color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>← BACK TO PORTFOLIO</Link>
         </div>
-        <div style={styles.navRight}>
-           <div style={styles.liveIndicator}>● LIVE</div>
+        <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--primary)', letterSpacing: '0.1em' }}>
+          NEPSE TERMINAL
         </div>
       </nav>
 
       <Layout>
-        <div className="dashboard-grid" style={styles.topSection}>
-          <div className="card" style={styles.fundamentalColumn}>
-             <div style={styles.cardHeader}>
-                <span style={styles.cardIcon}>📊</span>
-                <span style={styles.cardHeaderText}>Holdings Fundamentals</span>
-             </div>
-            <table style={styles.fundamentalTable}>
-              <tbody>
-                {fundamentalData.map(row => (
-                  <tr key={row.label}>
-                    <td style={styles.labelCell}>{row.label}</td>
-                    <td style={{ ...styles.valueCell, color: row.color || 'var(--text-main)' }}>{row.value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Header Section */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+          <div>
+            <h1 className="mono" style={{ fontSize: 48, letterSpacing: '-0.02em', marginBottom: 8, lineHeight: 1 }}>{symUpperCase}</h1>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <span style={{ fontSize: 14, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {holding.isImported ? 'Imported Asset' : 'Manual Portfolio Entry'}
+              </span>
+              <span style={{ padding: '4px 8px', background: 'rgba(15, 23, 42, 0.05)', borderRadius: 4, fontSize: 11, fontWeight: 700, color: 'var(--primary)' }}>
+                EQ
+              </span>
+            </div>
           </div>
-
-          <div style={styles.chartColumn}>
-            <div className="card" style={styles.chartWrapper}>
-              <TradingViewWidget symbol={symUpperCase} />
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 14, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
+              Current Price
+            </div>
+            <div className="mono" style={{ fontSize: 36, fontWeight: 700, color: 'var(--primary)', lineHeight: 1 }}>
+              {fmtNPR(holding.cur)}
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: changeVal >= 0 ? 'var(--profit)' : 'var(--loss)', marginTop: 8 }}>
+              {changeVal > 0 ? '▲' : (changeVal < 0 ? '▼' : '')} {fmtNPR(Math.abs(changeVal))} Today
             </div>
           </div>
         </div>
 
-        <div style={styles.tabContainer}>
-          <div className="tabs-wrapper" style={styles.tabs}>
-            {['About', 'Announcements', 'News', 'Dividend'].map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...styles.tabBtn, ...(activeTab === tab ? styles.tabActive : {}) }}>{tab}</button>
-            ))}
+        {/* Feature Grid - The Analytics */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24, marginBottom: 40 }}>
+          <div className="card">
+            <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Position Size</div>
+            <div className="mono" style={{ fontSize: 24, fontWeight: 700, marginTop: 8, color: 'var(--primary)' }}>{holding.qty.toLocaleString()} <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>Units</span></div>
+          </div>
+          
+          <div className="card">
+            <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Target Break-Even</div>
+            <div className="mono" style={{ fontSize: 24, fontWeight: 700, marginTop: 8, color: 'var(--primary)' }}>{fmtNPR(breakEven)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8, fontWeight: 500 }}>Inc. 0.4% SEBON + 0.015% DP</div>
           </div>
 
-          <div className="card" style={styles.tabData}>
-            {tabContent[activeTab] ? (
-              <table style={styles.infoTable}>
-                <tbody>
-                  {tabContent[activeTab].map(row => (
-                    <tr key={row.label}>
-                      <td style={styles.infoLabel}>{row.label}</td>
-                      <td style={styles.infoValue}>{row.value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div style={styles.emptyTab}>No {activeTab} data available for this position.</div>
-            )}
+          <div className="card">
+            <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Total Capital Deployed</div>
+            <div className="mono" style={{ fontSize: 24, fontWeight: 700, marginTop: 8, color: 'var(--primary)' }}>{fmtNPR(investment, 0)}</div>
           </div>
         </div>
+
+        {/* Deep Performance Features */}
+        <h3 style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--primary)', borderBottom: '2px solid var(--primary)', paddingBottom: 8, marginBottom: 24 }}>
+          Position Intelligence & Returns
+        </h3>
+        
+        <div className="card" style={{ padding: 0 }}>
+          <table style={{ margin: 0 }}>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th style={{ textAlign: 'right' }}>Value</th>
+                <th style={{ textAlign: 'right' }}>Analysis</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Current Market Value</td>
+                <td className="mono" style={{ textAlign: 'right', fontWeight: 700 }}>{fmtNPR(mktValue, 0)}</td>
+                <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>Real-time Valuation</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Total P/L</td>
+                <td className="mono" style={{ textAlign: 'right', fontWeight: 700, color: plColor }}>
+                  {pl > 0 ? '+' : ''}{fmtNPR(pl, 0)}
+                </td>
+                <td style={{ textAlign: 'right', color: plColor, fontWeight: 700 }}>
+                  {pl > 0 ? '+' : ''}{plPercent}%
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Daily Momentum</td>
+                <td className="mono" style={{ textAlign: 'right', fontWeight: 700, color: dailyPL >= 0 ? 'var(--profit)' : 'var(--loss)' }}>
+                  {dailyPL > 0 ? '+' : ''}{fmtNPR(dailyPL, 0)}
+                </td>
+                <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>Movement today</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Placeholder for future charting / NEPSE deep integrations */}
+        <div style={{ marginTop: 40, padding: 32, border: '1px dashed var(--border-strong)', borderRadius: 'var(--radius)', textAlign: 'center', background: 'rgba(15, 23, 42, 0.02)' }}>
+          <p style={{ fontWeight: 600, color: 'var(--text-muted)', fontSize: 13, letterSpacing: '0.05em' }}>ADVANCED CHARTING & NEPSE ORDERBOOK</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 8 }}>Market Depth and Technical Analytics engine deploying soon.</p>
+        </div>
+
       </Layout>
     </div>
   )
-}
-
-const styles = {
-  page: { background: 'var(--bg-main)', minHeight: '100vh', paddingBottom: 60 },
-  nav: { background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 },
-  navLeft: { display: 'flex', alignItems: 'center', gap: '16px' },
-  backLink: { color: 'var(--text-muted)', textDecoration: 'none', fontWeight: '800', fontSize: '11px', letterSpacing: '0.05em' },
-  divider: { width: 1, height: 20, background: 'var(--border)' },
-  pageTitle: { fontSize: '18px', fontWeight: '800', margin: 0, color: 'var(--text-main)', letterSpacing: '-0.02em' },
-  symBadge: { background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '800', fontFamily: 'var(--mono)' },
-  navRight: { display: 'flex', alignItems: 'center' },
-  liveIndicator: { color: 'var(--profit)', fontSize: '10px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: 6 },
-  topSection: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px', marginTop: '32px', alignItems: 'stretch' },
-  fundamentalColumn: { background: 'var(--bg-card)', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' },
-  cardHeader: { padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(0,0,0,0.02)' },
-  cardIcon: { fontSize: '18px' },
-  cardHeaderText: { fontSize: '13px', fontWeight: '800', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.05em' },
-  fundamentalTable: { width: '100%', borderCollapse: 'collapse', margin: 0 },
-  labelCell: { padding: '12px 20px', fontSize: '13px', fontWeight: '700', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' },
-  valueCell: { padding: '12px 20px', fontSize: '13px', fontWeight: '800', textAlign: 'right', borderBottom: '1px solid var(--border)', fontFamily: 'var(--mono)' },
-  chartColumn: { height: '600px' },
-  chartWrapper: { height: '100%', padding: 0, overflow: 'hidden' },
-  tabContainer: { marginTop: '40px' },
-  tabs: { display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' },
-  tabBtn: { background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '10px 20px', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', cursor: 'pointer', borderRadius: '8px', transition: 'all 0.2s' },
-  tabActive: { background: 'var(--secondary)', color: 'white', borderColor: 'var(--secondary)', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' },
-  tabData: { padding: 0, overflow: 'hidden' },
-  infoTable: { width: '100%', borderCollapse: 'collapse' },
-  infoLabel: { padding: '16px 24px', fontSize: '14px', fontWeight: '700', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', width: '300px' },
-  infoValue: { padding: '16px 24px', fontSize: '14px', fontWeight: '800', color: 'var(--text-main)', borderBottom: '1px solid var(--border)', fontFamily: 'var(--mono)' },
-  emptyTab: { padding: '60px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '14px', fontWeight: '600' }
 }
