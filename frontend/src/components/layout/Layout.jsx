@@ -1,3 +1,5 @@
+import AIChatbot from '../ai/AIChatbot'
+
 export default function Layout({ children }) {
   return (
     <main style={{ padding: '24px 0', width: '100%', maxWidth: 1200, margin: '0 auto' }}>
@@ -9,13 +11,14 @@ export default function Layout({ children }) {
           "EMPOWERING GAINS, FOCUSED ON PRECISION."
         </p>
         <p style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.1em' }}>
-          INSPIRED BY THE VISION OF <span className="mono" style={{ color: 'var(--primary)', fontWeight: 800 }}>ASHISH</span>
+          INSPIRED BY THE VISION OF <span className="mono" style={{ color: 'var(--primary)', fontWeight: 800 }}>ASHISH KHANAL</span>
         </p>
         <div style={{ width: 40, height: 2, background: 'var(--border)', margin: '20px auto' }}></div>
         <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 500 }}>
           © 2026 NEPSE PORTFOLIO TRACKER | BUILT FOR EXCELLENCE
         </p>
       </div>
+      <AIChatbot />
     </main>
   )
 }

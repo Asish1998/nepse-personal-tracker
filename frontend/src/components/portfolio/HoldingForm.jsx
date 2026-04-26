@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext'
 import { effectiveBuyCost } from '../../utils/feeEngine'
 import { fmtNPR, today } from '../../utils/formatters'
 
-const empty = { sym: '', qty: '', buy: '', cur: '', date: today(), shareType: 'Secondary', reason: '' }
+const empty = { sym: '', qty: '', buy: '', cur: '', date: today(), shareType: 'Secondary', reason: '', tradeCategory: 'Investment', stopLoss: '', profitTarget: '' }
 
 function FeeRow({ label, value, bold, sub }) {
   return (
@@ -26,6 +26,13 @@ export default function HoldingForm({ onClose }) {
     setForm(prev => {
       const updates = typeof fieldOrObj === 'object' ? fieldOrObj : { [fieldOrObj]: maybeVal }
       const updated = { ...prev, ...updates }
+      
+      // Clear targets if switched to Investment
+      if (updated.tradeCategory === 'Investment') {
+        updated.stopLoss = ''
+        updated.profitTarget = ''
+      }
+
       const qty = parseFloat(updated.qty)
       const buy = parseFloat(updated.buy)
       if (qty > 0 && buy > 0) {
@@ -75,6 +82,9 @@ export default function HoldingForm({ onClose }) {
         date: form.date,
         shareType: form.shareType,
         reason: form.reason || '',
+        tradeCategory: form.tradeCategory,
+        stopLoss: form.stopLoss ? parseFloat(form.stopLoss) : null,
+        profitTarget: form.profitTarget ? parseFloat(form.profitTarget) : null,
         netCost
       },
     })
@@ -82,18 +92,27 @@ export default function HoldingForm({ onClose }) {
     onClose()
   }
 
+  const fields = [
+    { label: 'Symbol',           field: 'sym',  type: 'text',   ph: 'NEPSE' },
+    { label: 'Quantity',         field: 'qty',  type: 'number', ph: '0' },
+    { label: 'Buy Price / sh',   field: 'buy',  type: 'number', ph: '' },
+    { label: 'Live NEPSE Price', field: 'cur', type: 'number', ph: 'Auto' },
+    { label: 'Buy Date',         field: 'date', type: 'date',   ph: '' },
+    { label: 'Share Type',       field: 'shareType', type: 'select', options: ['Secondary', 'IPO', 'Right', 'Bonus'] },
+    { label: 'Trade Category',   field: 'tradeCategory', type: 'select', options: ['Investment', 'Trading'] },
+  ]
+
+  if (form.tradeCategory === 'Trading') {
+    fields.push({ label: 'Stop Loss Target', field: 'stopLoss', type: 'number', ph: 'e.g. 500' })
+    fields.push({ label: 'Take Profit Target', field: 'profitTarget', type: 'number', ph: 'e.g. 800' })
+  }
+
+  fields.push({ label: 'Reason / Strategy', field: 'reason', type: 'textarea', ph: 'e.g. Fundamental analysis, Breakout logic, Emotional state...' })
+
   return (
     <div style={styles.wrap}>
       <div style={styles.grid}>
-        {[
-          { label: 'Symbol',           field: 'sym',  type: 'text',   ph: 'NEPSE' },
-          { label: 'Quantity',         field: 'qty',  type: 'number', ph: '0' },
-          { label: 'Buy Price / sh',   field: 'buy',  type: 'number', ph: '' },
-          { label: 'Live NEPSE Price', field: 'cur', type: 'number', ph: 'Auto' },
-          { label: 'Buy Date',         field: 'date', type: 'date',   ph: '' },
-          { label: 'Share Type',       field: 'shareType', type: 'select', options: ['Secondary', 'IPO', 'Right', 'Bonus'] },
-          { label: 'Reason / Strategy', field: 'reason', type: 'textarea', ph: 'e.g. Fundamental analysis, Breakout logic, Emotional state...' },
-        ].map(({ label, field, type, ph, options }) => (
+        {fields.map(({ label, field, type, ph, options }) => (
           <div key={field} style={{ 
             position: 'relative', 
             ...(field === 'reason' ? { gridColumn: '1 / -1', marginTop: '8px' } : {}) 

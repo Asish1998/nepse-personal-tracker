@@ -1,0 +1,212 @@
+/* Auth.css - Premium Glassmorphism UI */
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background-color: #0a0b10;
+  font-family: var(--sans);
+}
+
+.auth-orb {
+  position: absolute;
+  width: 40vw;
+  height: 40vw;
+  border-radius: 50%;
+  opacity: 0.3;
+  filter: blur(80px);
+}
+
+.auth-orb-1 {
+  top: -10%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(99,102,241,0.8) 0%, rgba(0,0,0,0) 70%);
+}
+
+.auth-orb-2 {
+  bottom: -10%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(236,72,153,0.8) 0%, rgba(0,0,0,0) 70%);
+}
+
+.auth-orb-register-1 {
+  top: -10%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(16,185,129,0.8) 0%, rgba(0,0,0,0) 70%);
+}
+
+.auth-orb-register-2 {
+  bottom: -10%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(99,102,241,0.8) 0%, rgba(0,0,0,0) 70%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 32px;
+  border-radius: 16px;
+  position: relative;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.auth-title.login {
+  background-image: linear-gradient(to right, #818cf8, #f472b6);
+}
+
+.auth-title.register {
+  background-image: linear-gradient(to right, #34d399, #818cf8);
+}
+
+.auth-subtitle {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.auth-error {
+  margin-bottom: 24px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  font-size: 14px;
+  text-align: center;
+}
+
+.auth-form-group {
+  margin-bottom: 20px;
+}
+
+.auth-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #9ca3af;
+  margin-bottom: 8px;
+}
+
+.auth-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #ffffff;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.auth-input::placeholder {
+  color: #6b7280;
+}
+
+.auth-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.auth-input.login:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 1px #6366f1;
+}
+
+.auth-input.register:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 1px #10b981;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.auth-submit-btn.login {
+  background: linear-gradient(to right, #4f46e5, #db2777);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+}
+
+.auth-submit-btn.register {
+  background: linear-gradient(to right, #059669, #4f46e5);
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);
+}
+
+.auth-footer {
+  margin-top: 32px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.auth-link {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-link.login {
+  color: #818cf8;
+}
+
+.auth-link.login:hover {
+  color: #a5b4fc;
+}
+
+.auth-link.register {
+  color: #34d399;
+}
+
+.auth-link.register:hover {
+  color: #6ee7b7;
+}

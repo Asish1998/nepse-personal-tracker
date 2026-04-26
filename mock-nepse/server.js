@@ -105,5 +105,27 @@ app.get('/price', async (req, res) => {
   }
 })
 
+app.get('/news', async (req, res) => {
+  try {
+    const response = await doFetch('https://merolagani.com/NewsList.aspx')
+    if (!response.ok) throw new Error('Failed to fetch from Merolagani')
+    const html = await response.text()
+    const $ = cheerio.load(html)
+    
+    const headlines = []
+    $('.media-body').each((i, el) => {
+      if (i >= 15) return false // get top 15
+      const title = $(el).find('h4.media-title a').text().trim()
+      const date = $(el).find('.media-label').text().trim()
+      if (title) headlines.push({ title, date })
+    })
+
+    res.json(headlines)
+  } catch (err) {
+    console.error('News error:', err.message)
+    res.status(500).json({ error: 'Failed to scrape news' })
+  }
+})
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`mock NEPSE API listening on ${PORT}`))

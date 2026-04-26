@@ -7,6 +7,7 @@ import AlertsManager from '../components/alerts/AlertsManager'
 import JournalManager from '../components/journal/JournalManager'
 import WatchlistManager from '../components/watchlist/WatchlistManager'
 import TechnicalChart from '../components/charts/TechnicalChart'
+import IntelligenceDashboard from '../components/intelligence/IntelligenceDashboard'
 
 // keep other stubs for now
 
@@ -15,7 +16,8 @@ const sections = {
   journal: JournalManager, 
   alerts: AlertsManager, 
   watchlist: WatchlistManager,
-  charts: TechnicalChart
+  charts: TechnicalChart,
+  intelligence: IntelligenceDashboard
 }
 
 

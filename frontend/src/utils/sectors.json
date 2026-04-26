@@ -1,0 +1,42 @@
+{
+  "NABIL": "Commercial Banks",
+  "NICA": "Commercial Banks",
+  "GBIME": "Commercial Banks",
+  "NMB": "Commercial Banks",
+  "EBL": "Commercial Banks",
+  "PCBL": "Commercial Banks",
+  "SANIMA": "Commercial Banks",
+  "SCB": "Commercial Banks",
+  
+  "CHDC": "Hydropower",
+  "API": "Hydropower",
+  "UPPER": "Hydropower",
+  "AHPC": "Hydropower",
+  "SHPC": "Hydropower",
+  "BPCL": "Hydropower",
+  "AKPL": "Hydropower",
+  "NHPC": "Hydropower",
+
+  "NLIC": "Life Insurance",
+  "LICN": "Life Insurance",
+  "ALICL": "Life Insurance",
+  
+  "SIC": "Non Life Insurance",
+  "NIL": "Non Life Insurance",
+  "NLG": "Non Life Insurance",
+
+  "CBBL": "Microfinance",
+  "NUBL": "Microfinance",
+  "RMDC": "Microfinance",
+
+  "SHIVM": "Manufacturing And Processing",
+  "HDL": "Manufacturing And Processing",
+  "UNL": "Manufacturing And Processing",
+  
+  "CIT": "Investment",
+  "NIFRA": "Investment",
+  "HIDCL": "Investment",
+
+  "TRH": "Hotels And Tourism",
+  "OHL": "Hotels And Tourism"
+}

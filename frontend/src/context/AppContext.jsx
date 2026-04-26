@@ -6,14 +6,17 @@ const initialState = {
   holdings: [],
   trades: [],
   importedHoldings: [],
-  alerts:    [],
-  watchlist: ['NTC', 'SBI', 'UPPER'],
+  alerts: [],
+  watchlist: [],
   emailConfig: {
     serviceId: '',
     templateId: '',
     publicKey: '',
     toEmail: '',
     enabled: false
+  },
+  aiConfig: {
+    geminiKey: ''
   }
 }
 
@@ -27,12 +30,12 @@ function reducer(state, action) {
       if (index !== -1) {
         const exist = merged[index]
         const totalQty = exist.qty + newH.qty
-        
+
         // Calculate WACC
         const existInv = (exist.inv !== undefined && exist.isImported) ? exist.inv : (exist.qty * exist.buy)
         const newInv = (newH.inv !== undefined && newH.isImported) ? newH.inv : (newH.qty * newH.buy)
         const avgBuy = (existInv + newInv) / totalQty
-        
+
         // Keep most recently added/updated current price if valid
         const nextCur = (newH.cur && !isNaN(newH.cur) && newH.cur > 0) ? newH.cur : exist.cur
 
@@ -60,9 +63,9 @@ function reducer(state, action) {
 
     case 'ADD_HOLDING': {
       const isManualAdd = !!action.payload.reason || action.payload.netCost !== undefined
-      
+
       const nextHoldings = mergeHoldings(state.holdings, [action.payload])
-      
+
       // Hook into Trade Journal engine for manual additions to enforce discipline
       if (isManualAdd) {
         const newTrade = {
@@ -73,13 +76,16 @@ function reducer(state, action) {
           price: action.payload.buy,
           date: action.payload.date,
           notes: action.payload.reason || 'No strategy provided.',
+          tradeCategory: action.payload.tradeCategory || 'Investment',
+          stopLoss: action.payload.stopLoss || null,
+          profitTarget: action.payload.profitTarget || null,
           gross: action.payload.qty * action.payload.buy,
           net: action.payload.netCost || (action.payload.qty * action.payload.buy),
           fees: action.payload.netCost ? (action.payload.netCost - (action.payload.qty * action.payload.buy)) : 0,
           shareType: action.payload.shareType || 'Secondary'
         }
-        return { 
-          ...state, 
+        return {
+          ...state,
           holdings: nextHoldings,
           trades: [newTrade, ...state.trades]
         }
@@ -103,8 +109,8 @@ function reducer(state, action) {
       return {
         ...state,
         holdings: state.holdings.map(h =>
-          h.sym === action.payload.sym 
-            ? { ...h, cur: action.payload.cur, prev: action.payload.prev || h.prev || action.payload.cur } 
+          h.sym === action.payload.sym
+            ? { ...h, cur: action.payload.cur, prev: action.payload.prev || h.prev || action.payload.cur }
             : h
         ),
       }
@@ -138,6 +144,9 @@ function reducer(state, action) {
         fees: fees.totalFees,
         buyPrice: holding.buy,
         shareType: holding.shareType || 'Secondary', // Carry over shareType
+        tradeCategory: holding.tradeCategory || 'Investment',
+        stopLoss: holding.stopLoss || null,
+        profitTarget: holding.profitTarget || null,
       }
 
       // 2. Update holdings
@@ -147,7 +156,7 @@ function reducer(state, action) {
         updatedHoldings = state.holdings.filter(h => h.id !== holdingId)
       } else {
         // Decrease quantity
-        updatedHoldings = state.holdings.map(h => 
+        updatedHoldings = state.holdings.map(h =>
           h.id === holdingId ? { ...h, qty: h.qty - qty } : h
         )
       }
@@ -184,28 +193,30 @@ function reducer(state, action) {
       return { ...state, watchlist: [...state.watchlist, action.payload] }
     case 'REMOVE_WATCH':
       return { ...state, watchlist: state.watchlist.filter(w => w !== action.payload) }
-    
+
     case 'UPDATE_EMAIL_CONFIG':
       return { ...state, emailConfig: { ...state.emailConfig, ...action.payload } }
+
+    case 'UPDATE_AI_CONFIG':
+      return { ...state, aiConfig: { ...state.aiConfig, ...action.payload } }
 
     default:
       return state
   }
 }
 
-const STORAGE_KEY = 'nepse_base_v2'
-
-export function AppProvider({ children }) {
+export function AppProvider({ children, storageKey = 'nepse_base_v2' }) {
   const [state, dispatch] = useReducer(reducer, initialState, (initial) => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY)
+      const saved = localStorage.getItem(storageKey)
       if (!saved) return initial
       const parsed = JSON.parse(saved)
       // Merge logic: ensure new fields like emailConfig exist even for old users
       return {
         ...initial,
         ...parsed,
-        emailConfig: { ...initial.emailConfig, ...(parsed.emailConfig || {}) }
+        emailConfig: { ...initial.emailConfig, ...(parsed.emailConfig || {}) },
+        aiConfig: { ...initial.aiConfig, ...(parsed.aiConfig || {}) }
       }
     } catch {
       return initial
@@ -219,7 +230,7 @@ export function AppProvider({ children }) {
 
     const id = setInterval(async () => {
       const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
-      
+
       for (const alert of activeAlerts) {
         try {
           const res = await fetch(`${API_BASE}/price?symbol=${encodeURIComponent(alert.sym)}`)
@@ -230,9 +241,9 @@ export function AppProvider({ children }) {
           if (ltp) {
             const triggered = alert.type === 'ABOVE' ? ltp >= alert.target : ltp <= alert.target
             if (triggered) {
-              dispatch({ 
-                type: 'UPDATE_ALERT', 
-                payload: { id: alert.id, status: 'TRIGGERED', triggeredAt: new Date().toISOString() } 
+              dispatch({
+                type: 'UPDATE_ALERT',
+                payload: { id: alert.id, status: 'TRIGGERED', triggeredAt: new Date().toISOString() }
               })
 
               // 1. Browser Notification
@@ -289,7 +300,7 @@ export function AppProvider({ children }) {
         const res = await fetch(`${API_BASE}/symbols`)
         if (!res.ok) return
         const symbolsData = await res.json()
-        
+
         const priceMap = {}
         for (const item of symbolsData) {
           const sym = (item.symbol || item.sym || '').toUpperCase()
@@ -298,22 +309,22 @@ export function AppProvider({ children }) {
             priceMap[sym] = parseFloat(ltp.toString().replace(/[^\d.-]/g, ''))
           }
         }
-        
+
         dispatch({ type: 'UPDATE_HOLDINGS_PRICES_BULK', payload: priceMap })
       } catch (err) { /* silent fail on network errors */ }
     }
 
     // Ping prices immediately on mount/load
     fetchPrices()
-    
+
     // Auto-update prices every 30 seconds while the app stays open
     const id = setInterval(fetchPrices, 30_000)
     return () => clearInterval(id)
   }, [state.holdings.length])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  }, [state])
+    localStorage.setItem(storageKey, JSON.stringify(state))
+  }, [state, storageKey])
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
