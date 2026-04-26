@@ -14,15 +14,21 @@ export default function Navbar({ active, onChange }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [showAI, setShowAI] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const handleLogout = () => {
     logout()
     navigate('/login')
   }
 
+  const handleTabChange = (key) => {
+    onChange(key)
+    setIsMenuOpen(false)
+  }
+
   return (
     <>
-      <header style={styles.header}>
+      <header className="navbar-container" style={styles.header}>
         <div style={styles.leftSection}>
           <div style={styles.brand}>
             <div style={styles.logoBox}>
@@ -34,11 +40,11 @@ export default function Navbar({ active, onChange }) {
             </div>
           </div>
           
-          <nav style={styles.nav}>
+          <nav className="desktop-nav" style={styles.nav}>
             {tabs.map(t => (
               <button
                 key={t.key}
-                onClick={() => onChange(t.key)}
+                onClick={() => handleTabChange(t.key)}
                 style={{ ...styles.tab, ...(active === t.key ? styles.tabActive : {}) }}
               >
                 {t.label}
@@ -47,21 +53,70 @@ export default function Navbar({ active, onChange }) {
           </nav>
         </div>
 
-        {user && (
-          <div style={styles.userSection}>
-            <button onClick={() => setShowAI(true)} style={styles.aiSetupBtn} title="AI Settings">
-              ✨ Setup AI
-            </button>
-            <div style={styles.userInfo}>
-              <div style={styles.userName}>{user.name}</div>
-              <div style={styles.userEmail}>{user.email}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {user && (
+            <div className="desktop-user" style={styles.userSection}>
+              <button onClick={() => setShowAI(true)} style={styles.aiSetupBtn} title="AI Settings">
+                ✨ Setup AI
+              </button>
+              <div style={styles.userInfo}>
+                <div style={styles.userName}>{user.name}</div>
+                <div style={styles.userEmail}>{user.email}</div>
+              </div>
+              <button onClick={handleLogout} style={styles.logoutBtn}>
+                Logout
+              </button>
             </div>
-            <button onClick={handleLogout} style={styles.logoutBtn}>
-              Logout
-            </button>
-          </div>
-        )}
+          )}
+
+          <button 
+            className="mobile-menu-toggle"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            style={styles.menuBtn}
+          >
+            {isMenuOpen ? '✕' : '☰'}
+          </button>
+        </div>
       </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div style={styles.mobileOverlay}>
+          <div style={styles.mobileContent}>
+            {tabs.map(t => (
+              <button
+                key={t.key}
+                onClick={() => handleTabChange(t.key)}
+                style={{ ...styles.mobileTab, ...(active === t.key ? styles.mobileTabActive : {}) }}
+              >
+                {t.label}
+              </button>
+            ))}
+            {user && (
+              <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontWeight: 800, fontSize: 16 }}>{user.name}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{user.email}</div>
+                </div>
+                <button 
+                  className="btn-primary" 
+                  style={{ width: '100%', marginBottom: 12 }}
+                  onClick={() => { setShowAI(true); setIsMenuOpen(false); }}
+                >
+                  ✨ AI Setup
+                </button>
+                <button 
+                  className="btn-secondary" 
+                  style={{ width: '100%', color: 'var(--loss)', borderColor: 'var(--loss)' }}
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showAI && <AISettingsModal onClose={() => setShowAI(false)} />}
     </>
@@ -195,5 +250,47 @@ const styles = {
     transition: 'all 0.2s',
     textTransform: 'none',
     letterSpacing: '0',
+  },
+  menuBtn: {
+    display: 'none', // Overwritten by CSS in index.css for mobile
+    background: 'none',
+    border: 'none',
+    fontSize: '24px',
+    color: 'var(--text-main)',
+    cursor: 'pointer',
+    padding: '4px',
+  },
+  mobileOverlay: {
+    position: 'fixed',
+    top: 'var(--header-height)',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'var(--bg-main)',
+    zIndex: 99,
+    padding: '24px',
+    animation: 'fadeIn 0.2s ease-out'
+  },
+  mobileContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px'
+  },
+  mobileTab: {
+    width: '100%',
+    textAlign: 'left',
+    padding: '16px',
+    borderRadius: '12px',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border)',
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'var(--text-main)',
+    cursor: 'pointer'
+  },
+  mobileTabActive: {
+    background: 'var(--primary)',
+    color: 'white',
+    borderColor: 'var(--primary)'
   }
 }

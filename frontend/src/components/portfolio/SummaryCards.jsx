@@ -67,7 +67,7 @@ export default function SummaryCards() {
   ]
 
   return (
-    <div style={styles.grid}>
+    <div className="summary-grid" style={styles.grid}>
       {cards.map(c => (
         <div key={c.label} className="card" style={{ ...styles.card, border: c.bold ? '2px solid var(--primary)' : '1px solid var(--border)' }}>
           <div style={styles.label}>{c.label}</div>

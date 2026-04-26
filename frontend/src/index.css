@@ -34,6 +34,10 @@
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
   --mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
   
+  --radius: 12px;
+  --container-width: 1200px;
+  --header-height: 70px;
+  
   font-family: var(--sans);
   font-size: 14px;
   line-height: 1.6;
@@ -41,11 +45,18 @@
   background: var(--bg-main);
 }
 
+@media (max-width: 768px) {
+  :root {
+    font-size: 13px;
+    --header-height: 60px;
+  }
+}
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -55,6 +66,18 @@ body {
   background-image: 
     radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
     radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.05) 0px, transparent 50%);
+}
+
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 16px;
+  }
 }
 
 #root {
@@ -205,6 +228,74 @@ input:focus {
 @keyframes ticker {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Overrides */
+@media (max-width: 900px) {
+  .desktop-nav, .desktop-user {
+    display: none !important;
+  }
+  .mobile-menu-toggle {
+    display: block !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar-container {
+    margin: 8px 12px !important;
+    padding: 8px 16px !important;
+  }
+  .brandName {
+    font-size: 15px !important;
+  }
+}
+
+/* New Responsive Components */
+.hub-grid {
+  display: grid !important;
+}
+
+@media (max-width: 1024px) {
+  .hub-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+}
+
+.summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 16px !important;
+}
+
+@media (max-width: 640px) {
+  .summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+table {
+  min-width: 800px; /* Force scroll on mobile */
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px !important;
+  }
 }
 
 

@@ -43,7 +43,7 @@ export default function Portfolio() {
       
       <HoldingIntelligence />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 24, marginBottom: 24 }}>
+      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 24, marginBottom: 24 }}>
         <PortfolioChart />
         {/* Placeholder for future charts or stats */}
       </div>
@@ -81,7 +81,9 @@ export default function Portfolio() {
         </div>
 
         {showForm && <HoldingForm onClose={() => setShowForm(false)} />}
-        <HoldingsTable />
+        <div className="table-container">
+          <HoldingsTable />
+        </div>
       </div>
 
     </div>

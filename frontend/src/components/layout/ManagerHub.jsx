@@ -12,7 +12,7 @@ export default function ManagerHub() {
           <p style={styles.subtitle}>Unified control for your strategy and monitoring.</p>
         </div>
 
-        <div style={styles.grid}>
+        <div className="hub-grid" style={styles.grid}>
           <div style={styles.columnMain}>
             <div style={styles.sectionHeader}>
               <span style={styles.sectionIcon}>📝</span>
