@@ -237,13 +237,8 @@ function reducer(state, action) {
     case 'LOCK':
       return { ...state, isLocked: true }
     case 'UNLOCK': {
-      try {
-        const saved = localStorage.getItem('nepse_base_v2')
-        const decrypted = decryptData(saved, action.payload)
-        return { ...decrypted, masterPin: action.payload, isLocked: false }
-      } catch (e) {
-        return { ...state, isLocked: true }
-      }
+      // payload will be { decryptedData, pin }
+      return { ...action.payload.decryptedData, masterPin: action.payload.pin, isLocked: false }
     }
     default:
       return state
@@ -256,19 +251,23 @@ export function AppProvider({ children, storageKey = 'nepse_base_v2' }) {
       const saved = localStorage.getItem(storageKey)
       if (!saved) return initial
 
-      // Try to decrypt without a PIN (for unencrypted data)
+      // Check if we have a session PIN (to avoid re-entry in new tabs)
+      const sessionPin = sessionStorage.getItem(`pin_${storageKey}`)
+
+      // Try to decrypt with session pin or null
       try {
-        const parsed = decryptData(saved, null)
+        const parsed = decryptData(saved, sessionPin)
         return {
           ...initial,
           ...parsed,
           emailConfig: { ...initial.emailConfig, ...(parsed.emailConfig || {}) },
           aiConfig: { ...initial.aiConfig, ...(parsed.aiConfig || {}) },
           familyBOIDs: parsed.familyBOIDs || [],
-          isLocked: false
+          isLocked: false,
+          masterPin: sessionPin
         }
       } catch (e) {
-        // Data is likely encrypted
+        // Data is likely encrypted and no valid session pin
         return { ...initial, isLocked: true }
       }
     } catch {
@@ -278,9 +277,14 @@ export function AppProvider({ children, storageKey = 'nepse_base_v2' }) {
 
   // ── Persistence Logic ─────────────────────────────
   useEffect(() => {
-    if (state.isLocked) return // Don't overwrite with empty locked state
+    if (state.isLocked) return 
     const encrypted = encryptData(state, state.masterPin)
     localStorage.setItem(storageKey, encrypted)
+    
+    // Also save pin to session storage for seamless multi-tab experience
+    if (state.masterPin) {
+      sessionStorage.setItem(`pin_${storageKey}`, state.masterPin)
+    }
   }, [state, storageKey])
 
   // ── Alert Monitoring Logic ────────────────────────

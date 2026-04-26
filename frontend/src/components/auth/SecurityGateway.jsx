@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { useApp } from '../../context/AppContext'
+import { useAuth } from '../../context/AuthContext'
+import { decryptData } from '../../utils/cryptoUtils'
 
 export default function SecurityGateway() {
   const { state, dispatch } = useApp()
+  const { user } = useAuth()
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
 
@@ -10,16 +13,20 @@ export default function SecurityGateway() {
 
   const handleUnlock = () => {
     if (!pin) return setError('PIN is required')
-    dispatch({ type: 'UNLOCK', payload: pin })
-    // The unlock logic in reducer will persist the locked state if PIN is wrong
-    setTimeout(() => {
-      const saved = localStorage.getItem('nepse_base_v2')
-      if (saved && saved.startsWith('{')) {
-         // decrypted successfully
+    
+    try {
+      const storageKey = `nepse_v2_${user.id}`
+      const saved = localStorage.getItem(storageKey)
+      const decryptedData = decryptData(saved, pin)
+      
+      if (decryptedData) {
+        dispatch({ type: 'UNLOCK', payload: { decryptedData, pin } })
       } else {
-         setError('Invalid Master PIN. Please try again.')
+        throw new Error('Invalid PIN')
       }
-    }, 100)
+    } catch (e) {
+      setError(e.message || 'Invalid Master PIN. Please try again.')
+    }
   }
 
   return (
