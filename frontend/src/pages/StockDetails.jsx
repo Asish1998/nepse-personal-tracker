@@ -32,7 +32,7 @@ export default function StockDetails() {
     { label: 'Shares Outstanding', value: (holding.sharesOutstanding || 100000000).toLocaleString() },
     { label: 'Market Price', value: fmtNPR(holding.cur), color: 'var(--loss)' },
     { label: '% Change', value: '0 %', color: 'var(--loss)' },
-    { label: 'Last Traded On', value: new Date().toLocaleString() },
+    { label: 'Last Traded On', value: new Date().toLocaleDateString(), sub: 'At Market Close' },
     { label: '52 Weeks High - Low', value: '317.00 - 227.00' },
     { label: '120 Day Average', value: '271.32' },
     { label: '1 Year Yield', value: '18.04%', color: 'var(--profit)' },
@@ -51,26 +51,32 @@ export default function StockDetails() {
       { label: 'Sector', value: holding.sector || 'Hydro Power' },
       { label: 'Listed Shares', value: (holding.sharesOutstanding || 38959421).toLocaleString() },
       { label: 'Paidup Value', value: '100.00' },
-      { label: 'Total Paidup Value', value: fmtNPR(holding.investment || 3895942100, 0) },
-    ],
-    'Announcements': [],
-    'News': [],
-    // Add more tabs as needed
+      { label: 'Total Paidup Value', value: fmtNPR(holding.qty * 100, 0) },
+    ]
   }
 
   return (
     <div style={styles.page}>
       <nav style={styles.nav}>
         <div style={styles.navLeft}>
-          <Link to="/" style={styles.backLink}>← BACK</Link>
-          <h1 style={styles.pageTitle}>{holding.name} ({symUpperCase})</h1>
+          <Link to="/" style={styles.backLink}>← TERMINAL</Link>
+          <div style={styles.divider}></div>
+          <h1 style={styles.pageTitle}>{holding.name}</h1>
+          <span style={styles.symBadge}>{symUpperCase}</span>
+        </div>
+        <div style={styles.navRight}>
+           <div style={styles.liveIndicator}>● LIVE</div>
         </div>
       </nav>
 
       <Layout>
-        <div style={styles.topSection}>
+        <div className="dashboard-grid" style={styles.topSection}>
           {/* Left Column: Fundamental Scorecard */}
-          <div style={styles.fundamentalColumn}>
+          <div className="card" style={styles.fundamentalColumn}>
+             <div style={styles.cardHeader}>
+                <span style={styles.cardIcon}>📊</span>
+                <span style={styles.cardHeaderText}>Holdings Fundamentals</span>
+             </div>
             <table style={styles.fundamentalTable}>
               <tbody>
                 {fundamentalData.map(row => (
@@ -85,7 +91,7 @@ export default function StockDetails() {
 
           {/* Right Column: Advanced Chart */}
           <div style={styles.chartColumn}>
-            <div style={styles.chartWrapper}>
+            <div className="card" style={styles.chartWrapper}>
               <TradingViewWidget symbol={symUpperCase} />
             </div>
           </div>
@@ -93,8 +99,8 @@ export default function StockDetails() {
 
         {/* Tabbed Navigation */}
         <div style={styles.tabContainer}>
-          <div style={styles.tabs}>
-            {['About', 'Announcements', 'News', 'Price History', 'Floorsheet', 'AGM', 'Quarterly Report', 'Dividend'].map(tab => (
+          <div className="tabs-wrapper" style={styles.tabs}>
+            {['About', 'Announcements', 'News', 'Price History', 'Floorsheet', 'AGM', 'Dividend'].map(tab => (
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab)}
@@ -106,7 +112,7 @@ export default function StockDetails() {
           </div>
 
           {/* Tab Content Table */}
-          <div style={styles.tabData}>
+          <div className="card" style={styles.tabData}>
             {tabContent[activeTab] ? (
               <table style={styles.infoTable}>
                 <tbody>
@@ -119,7 +125,10 @@ export default function StockDetails() {
                 </tbody>
               </table>
             ) : (
-              <div style={styles.emptyTab}>No {activeTab} data available for this symbol.</div>
+              <div style={styles.emptyTab}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>🌑</div>
+                No {activeTab} data available for this position in current session.
+              </div>
             )}
           </div>
         </div>
@@ -129,103 +138,111 @@ export default function StockDetails() {
 }
 
 const styles = {
-  page: { background: 'var(--bg-main)', minHeight: '100vh' },
+  page: { background: 'var(--bg-main)', minHeight: '100vh', paddingBottom: 60 },
   nav: { 
-    background: '#047783', // NEPSE/Merolagani style teal
-    padding: '12px 24px',
-    color: 'white',
+    background: 'var(--bg-card)',
+    borderBottom: '1px solid var(--border)',
+    padding: '16px 24px',
     display: 'flex',
-    alignItems: 'center'
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'sticky',
+    top: 0,
+    zIndex: 100
   },
-  navLeft: { display: 'flex', alignItems: 'center', gap: '20px' },
-  backLink: { color: 'white', textDecoration: 'none', fontWeight: '700', fontSize: '13px' },
-  pageTitle: { fontSize: '18px', fontWeight: '800', margin: 0 },
+  navLeft: { display: 'flex', alignItems: 'center', gap: '16px' },
+  backLink: { color: 'var(--text-muted)', textDecoration: 'none', fontWeight: '800', fontSize: '11px', letterSpacing: '0.05em' },
+  divider: { width: 1, height: 20, background: 'var(--border)' },
+  pageTitle: { fontSize: '18px', fontWeight: '800', margin: 0, color: 'var(--text-main)', letterSpacing: '-0.02em' },
+  symBadge: { background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '800', fontFamily: 'var(--mono)' },
+  navRight: { display: 'flex', alignItems: 'center' },
+  liveIndicator: { color: 'var(--profit)', fontSize: '10px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: 6 },
+  
   topSection: { 
-    display: 'flex', 
+    display: 'grid', 
+    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
     gap: '24px', 
-    marginTop: '24px',
-    flexDirection: 'row',
-    flexWrap: 'wrap'
+    marginTop: '32px',
+    alignItems: 'stretch'
   },
   fundamentalColumn: { 
-    flex: '0 0 350px',
-    background: 'white',
-    border: '1px solid #047783',
-    borderRadius: '4px',
-    overflow: 'hidden'
+    background: 'var(--bg-card)',
+    padding: 0,
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column'
   },
+  cardHeader: { padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(0,0,0,0.02)' },
+  cardIcon: { fontSize: '18px' },
+  cardHeaderText: { fontSize: '13px', fontWeight: '800', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.05em' },
   fundamentalTable: { width: '100%', borderCollapse: 'collapse', margin: 0 },
   labelCell: { 
-    padding: '10px 16px', 
-    fontSize: '13px', 
-    fontWeight: '700', 
-    color: 'var(--text-main)',
-    borderBottom: '1px solid #eee'
-  },
-  valueCell: { 
-    padding: '10px 16px', 
-    fontSize: '13px', 
-    fontWeight: '700', 
-    textAlign: 'right',
-    borderBottom: '1px solid #eee'
-  },
-  chartColumn: { 
-    flex: '1',
-    minWidth: '400px',
-    height: '550px'
-  },
-  chartWrapper: {
-    height: '100%',
-    width: '100%',
-    background: 'white',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    overflow: 'hidden'
-  },
-  tabContainer: { marginTop: '32px' },
-  tabs: { 
-    display: 'flex', 
-    gap: '4px', 
-    borderBottom: '1px solid #ddd',
-    paddingBottom: '0',
-    flexWrap: 'wrap'
-  },
-  tabBtn: {
-    background: '#eee',
-    border: '1px solid #ddd',
-    borderBottom: 'none',
-    padding: '10px 20px',
-    fontSize: '12px',
-    fontWeight: '700',
-    color: '#047783',
-    cursor: 'pointer',
-    borderRadius: '4px 4px 0 0'
-  },
-  tabActive: {
-    background: '#f4a261', // Orange active tab from screenshot
-    color: 'white',
-    borderColor: '#f4a261'
-  },
-  tabData: {
-    background: 'white',
-    border: '1px solid #ddd',
-    borderTop: 'none',
-    padding: '1px'
-  },
-  infoTable: { width: '100%', borderCollapse: 'collapse' },
-  infoLabel: { 
     padding: '12px 20px', 
     fontSize: '13px', 
     fontWeight: '700', 
-    color: 'var(--text-main)',
-    borderBottom: '1px solid #efefef',
-    width: '250px'
+    color: 'var(--text-muted)',
+    borderBottom: '1px solid var(--border)'
+  },
+  valueCell: { 
+    padding: '12px 20px', 
+    fontSize: '13px', 
+    fontWeight: '800', 
+    textAlign: 'right',
+    borderBottom: '1px solid var(--border)',
+    fontFamily: 'var(--mono)'
+  },
+  chartColumn: { 
+    height: '600px'
+  },
+  chartWrapper: {
+    height: '100%',
+    padding: 0,
+    overflow: 'hidden'
+  },
+  tabContainer: { marginTop: '40px' },
+  tabs: { 
+    display: 'flex', 
+    gap: '8px', 
+    marginBottom: '16px',
+    flexWrap: 'wrap'
+  },
+  tabBtn: {
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border)',
+    padding: '10px 20px',
+    fontSize: '12px',
+    fontWeight: '700',
+    color: 'var(--text-muted)',
+    cursor: 'pointer',
+    borderRadius: '8px',
+    transition: 'all 0.2s'
+  },
+  tabActive: {
+    background: 'var(--secondary)',
+    color: 'white',
+    borderColor: 'var(--secondary)',
+    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+  },
+  tabData: {
+    padding: 0,
+    overflow: 'hidden'
+  },
+  infoTable: { width: '100%', borderCollapse: 'collapse' },
+  infoLabel: { 
+    padding: '16px 24px', 
+    fontSize: '14px', 
+    fontWeight: '700', 
+    color: 'var(--text-muted)',
+    borderBottom: '1px solid var(--border)',
+    width: '300px'
   },
   infoValue: {
-    padding: '12px 20px',
-    fontSize: '13px',
+    padding: '16px 24px',
+    fontSize: '14px',
+    fontWeight: '800',
     color: 'var(--text-main)',
-    borderBottom: '1px solid #efefef'
+    borderBottom: '1px solid var(--border)',
+    fontFamily: 'var(--mono)'
   },
-  emptyTab: { padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '14px' }
+  emptyTab: { padding: '60px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '14px', fontWeight: '600' }
 }

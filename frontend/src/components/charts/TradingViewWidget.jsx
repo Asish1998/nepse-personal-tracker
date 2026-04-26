@@ -15,10 +15,10 @@ export default function TradingViewWidget({ symbol }) {
     script.async = true;
     script.innerHTML = JSON.stringify({
       "autosize": true,
-      "symbol": `NEPSE:${symbol}`, // Note: NEPSE symbols usually need a prefix or custom mapping if not on TV
+      "symbol": `NEPSE:${symbol}`,
       "interval": "D",
       "timezone": "Etc/UTC",
-      "theme": "light",
+      "theme": "dark",
       "style": "1",
       "locale": "en",
       "enable_publishing": false,
