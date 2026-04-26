@@ -1,0 +1,37 @@
+import { useEffect, useRef } from 'react';
+
+export default function TradingViewWidget({ symbol }) {
+  const container = useRef();
+
+  useEffect(() => {
+    // Clear previous widget
+    if (container.current) {
+      container.current.innerHTML = '';
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    script.type = "text/javascript";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      "autosize": true,
+      "symbol": `NEPSE:${symbol}`, // Note: NEPSE symbols usually need a prefix or custom mapping if not on TV
+      "interval": "D",
+      "timezone": "Etc/UTC",
+      "theme": "light",
+      "style": "1",
+      "locale": "en",
+      "enable_publishing": false,
+      "allow_symbol_change": true,
+      "container_id": "tradingview_ae7da"
+    });
+    
+    container.current.appendChild(script);
+  }, [symbol]);
+
+  return (
+    <div className='tradingview-widget-container' ref={container} style={{ height: "100%", width: "100%" }}>
+      <div className='tradingview-widget-container__widget' style={{ height: "calc(100% - 32px)", width: "100%" }}></div>
+    </div>
+  );
+}
