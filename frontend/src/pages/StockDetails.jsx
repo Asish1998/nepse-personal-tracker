@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext'
 import { fmtNPR } from '../utils/formatters'
 import Layout from '../components/layout/Layout'
 import TradingViewWidget from '../components/charts/TradingViewWidget'
+import { getFundamentalData } from '../utils/stockData'
 
 export default function StockDetails() {
   const { symbol } = useParams()
@@ -12,13 +13,13 @@ export default function StockDetails() {
 
   const symUpperCase = symbol?.toUpperCase()
   const holding = state.holdings.find(h => h.sym === symUpperCase)
+  const facts = getFundamentalData(symUpperCase)
 
   if (!holding) {
     return (
       <Layout>
         <div style={{ textAlign: 'center', padding: '100px 0' }}>
           <h2 style={{ color: 'var(--text-muted)' }}>Stock Not Found</h2>
-          <p style={{ marginTop: 16 }}>No data available for symbol "{symUpperCase}" in your portfolio.</p>
           <Link to="/" className="btn-primary" style={{ display: 'inline-block', marginTop: 24, textDecoration: 'none' }}>
             Back to Dashboard
           </Link>
@@ -28,30 +29,27 @@ export default function StockDetails() {
   }
 
   const fundamentalData = [
-    { label: 'Sector', value: holding.sector || 'Commercial Banks', color: 'var(--accent)' },
-    { label: 'Shares Outstanding', value: (holding.sharesOutstanding || 100000000).toLocaleString() },
+    { label: 'Sector', value: facts.sector || holding.sector, color: 'var(--accent)' },
+    { label: 'Shares Outstanding', value: facts.sharesOutstanding?.toLocaleString() || 'N/A' },
     { label: 'Market Price', value: fmtNPR(holding.cur), color: 'var(--loss)' },
     { label: '% Change', value: '0 %', color: 'var(--loss)' },
-    { label: 'Last Traded On', value: new Date().toLocaleDateString(), sub: 'At Market Close' },
-    { label: '52 Weeks High - Low', value: '317.00 - 227.00' },
-    { label: '120 Day Average', value: '271.32' },
-    { label: '1 Year Yield', value: '18.04%', color: 'var(--profit)' },
-    { label: 'EPS', value: '7.93' },
-    { label: 'P/E Ratio', value: '33.80' },
-    { label: 'Book Value', value: '103.69' },
-    { label: 'PBV', value: '2.58' },
-    { label: '% Dividend', value: '0.53', color: 'var(--accent)' },
-    { label: '% Bonus', value: '-', color: 'var(--accent)' },
+    { label: '52 Weeks High - Low', value: facts.range52w },
+    { label: '1 Year Yield', value: facts.yield, color: 'var(--profit)' },
+    { label: 'EPS', value: facts.eps },
+    { label: 'P/E Ratio', value: facts.pe },
+    { label: 'Book Value', value: facts.bookValue },
+    { label: 'PBV', value: facts.pbv },
+    { label: '% Dividend', value: facts.dividend, color: 'var(--accent)' },
   ]
 
   const tabContent = {
     'About': [
       { label: 'Symbol', value: symUpperCase },
-      { label: 'Company Name', value: holding.name || 'Sample Company Ltd.' },
-      { label: 'Sector', value: holding.sector || 'Hydro Power' },
-      { label: 'Listed Shares', value: (holding.sharesOutstanding || 38959421).toLocaleString() },
+      { label: 'Company Name', value: holding.name || facts.name || 'Company Profile' },
+      { label: 'Sector', value: facts.sector || holding.sector },
+      { label: 'Listed Shares', value: facts.sharesOutstanding?.toLocaleString() || 'N/A' },
       { label: 'Paidup Value', value: '100.00' },
-      { label: 'Total Paidup Value', value: fmtNPR(holding.qty * 100, 0) },
+      { label: 'Total Equity Capital', value: facts.sharesOutstanding ? fmtNPR(facts.sharesOutstanding * 100, 0) : 'N/A' },
     ]
   }
 
@@ -61,7 +59,7 @@ export default function StockDetails() {
         <div style={styles.navLeft}>
           <Link to="/" style={styles.backLink}>← TERMINAL</Link>
           <div style={styles.divider}></div>
-          <h1 style={styles.pageTitle}>{holding.name}</h1>
+          <h1 style={styles.pageTitle}>{holding.name || symUpperCase}</h1>
           <span style={styles.symBadge}>{symUpperCase}</span>
         </div>
         <div style={styles.navRight}>
@@ -71,7 +69,6 @@ export default function StockDetails() {
 
       <Layout>
         <div className="dashboard-grid" style={styles.topSection}>
-          {/* Left Column: Fundamental Scorecard */}
           <div className="card" style={styles.fundamentalColumn}>
              <div style={styles.cardHeader}>
                 <span style={styles.cardIcon}>📊</span>
@@ -89,7 +86,6 @@ export default function StockDetails() {
             </table>
           </div>
 
-          {/* Right Column: Advanced Chart */}
           <div style={styles.chartColumn}>
             <div className="card" style={styles.chartWrapper}>
               <TradingViewWidget symbol={symUpperCase} />
@@ -97,21 +93,13 @@ export default function StockDetails() {
           </div>
         </div>
 
-        {/* Tabbed Navigation */}
         <div style={styles.tabContainer}>
           <div className="tabs-wrapper" style={styles.tabs}>
-            {['About', 'Announcements', 'News', 'Price History', 'Floorsheet', 'AGM', 'Dividend'].map(tab => (
-              <button 
-                key={tab} 
-                onClick={() => setActiveTab(tab)}
-                style={{ ...styles.tabBtn, ...(activeTab === tab ? styles.tabActive : {}) }}
-              >
-                {tab}
-              </button>
+            {['About', 'Announcements', 'News', 'Dividend'].map(tab => (
+              <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...styles.tabBtn, ...(activeTab === tab ? styles.tabActive : {}) }}>{tab}</button>
             ))}
           </div>
 
-          {/* Tab Content Table */}
           <div className="card" style={styles.tabData}>
             {tabContent[activeTab] ? (
               <table style={styles.infoTable}>
@@ -125,10 +113,7 @@ export default function StockDetails() {
                 </tbody>
               </table>
             ) : (
-              <div style={styles.emptyTab}>
-                <div style={{ fontSize: 32, marginBottom: 12 }}>🌑</div>
-                No {activeTab} data available for this position in current session.
-              </div>
+              <div style={styles.emptyTab}>No {activeTab} data available for this position.</div>
             )}
           </div>
         </div>
@@ -139,17 +124,7 @@ export default function StockDetails() {
 
 const styles = {
   page: { background: 'var(--bg-main)', minHeight: '100vh', paddingBottom: 60 },
-  nav: { 
-    background: 'var(--bg-card)',
-    borderBottom: '1px solid var(--border)',
-    padding: '16px 24px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    position: 'sticky',
-    top: 0,
-    zIndex: 100
-  },
+  nav: { background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 },
   navLeft: { display: 'flex', alignItems: 'center', gap: '16px' },
   backLink: { color: 'var(--text-muted)', textDecoration: 'none', fontWeight: '800', fontSize: '11px', letterSpacing: '0.05em' },
   divider: { width: 1, height: 20, background: 'var(--border)' },
@@ -157,92 +132,23 @@ const styles = {
   symBadge: { background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '800', fontFamily: 'var(--mono)' },
   navRight: { display: 'flex', alignItems: 'center' },
   liveIndicator: { color: 'var(--profit)', fontSize: '10px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: 6 },
-  
-  topSection: { 
-    display: 'grid', 
-    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
-    gap: '24px', 
-    marginTop: '32px',
-    alignItems: 'stretch'
-  },
-  fundamentalColumn: { 
-    background: 'var(--bg-card)',
-    padding: 0,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column'
-  },
+  topSection: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px', marginTop: '32px', alignItems: 'stretch' },
+  fundamentalColumn: { background: 'var(--bg-card)', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' },
   cardHeader: { padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(0,0,0,0.02)' },
   cardIcon: { fontSize: '18px' },
   cardHeaderText: { fontSize: '13px', fontWeight: '800', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.05em' },
   fundamentalTable: { width: '100%', borderCollapse: 'collapse', margin: 0 },
-  labelCell: { 
-    padding: '12px 20px', 
-    fontSize: '13px', 
-    fontWeight: '700', 
-    color: 'var(--text-muted)',
-    borderBottom: '1px solid var(--border)'
-  },
-  valueCell: { 
-    padding: '12px 20px', 
-    fontSize: '13px', 
-    fontWeight: '800', 
-    textAlign: 'right',
-    borderBottom: '1px solid var(--border)',
-    fontFamily: 'var(--mono)'
-  },
-  chartColumn: { 
-    height: '600px'
-  },
-  chartWrapper: {
-    height: '100%',
-    padding: 0,
-    overflow: 'hidden'
-  },
+  labelCell: { padding: '12px 20px', fontSize: '13px', fontWeight: '700', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' },
+  valueCell: { padding: '12px 20px', fontSize: '13px', fontWeight: '800', textAlign: 'right', borderBottom: '1px solid var(--border)', fontFamily: 'var(--mono)' },
+  chartColumn: { height: '600px' },
+  chartWrapper: { height: '100%', padding: 0, overflow: 'hidden' },
   tabContainer: { marginTop: '40px' },
-  tabs: { 
-    display: 'flex', 
-    gap: '8px', 
-    marginBottom: '16px',
-    flexWrap: 'wrap'
-  },
-  tabBtn: {
-    background: 'var(--bg-card)',
-    border: '1px solid var(--border)',
-    padding: '10px 20px',
-    fontSize: '12px',
-    fontWeight: '700',
-    color: 'var(--text-muted)',
-    cursor: 'pointer',
-    borderRadius: '8px',
-    transition: 'all 0.2s'
-  },
-  tabActive: {
-    background: 'var(--secondary)',
-    color: 'white',
-    borderColor: 'var(--secondary)',
-    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
-  },
-  tabData: {
-    padding: 0,
-    overflow: 'hidden'
-  },
+  tabs: { display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' },
+  tabBtn: { background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '10px 20px', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', cursor: 'pointer', borderRadius: '8px', transition: 'all 0.2s' },
+  tabActive: { background: 'var(--secondary)', color: 'white', borderColor: 'var(--secondary)', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' },
+  tabData: { padding: 0, overflow: 'hidden' },
   infoTable: { width: '100%', borderCollapse: 'collapse' },
-  infoLabel: { 
-    padding: '16px 24px', 
-    fontSize: '14px', 
-    fontWeight: '700', 
-    color: 'var(--text-muted)',
-    borderBottom: '1px solid var(--border)',
-    width: '300px'
-  },
-  infoValue: {
-    padding: '16px 24px',
-    fontSize: '14px',
-    fontWeight: '800',
-    color: 'var(--text-main)',
-    borderBottom: '1px solid var(--border)',
-    fontFamily: 'var(--mono)'
-  },
+  infoLabel: { padding: '16px 24px', fontSize: '14px', fontWeight: '700', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', width: '300px' },
+  infoValue: { padding: '16px 24px', fontSize: '14px', fontWeight: '800', color: 'var(--text-main)', borderBottom: '1px solid var(--border)', fontFamily: 'var(--mono)' },
   emptyTab: { padding: '60px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '14px', fontWeight: '600' }
 }
