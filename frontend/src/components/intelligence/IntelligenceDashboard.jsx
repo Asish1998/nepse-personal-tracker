@@ -7,6 +7,7 @@ import { fmtNPR } from '../../utils/formatters'
 import { tellGemini } from '../../utils/aiClient'
 import MarketNews from './MarketNews'
 import SignalIntelligence from './SignalIntelligence'
+import PredictiveCenter from './PredictiveCenter'
 
 function MetricCard({ title, value, sub, colorClass = 'text-main' }) {
   return (
@@ -115,6 +116,7 @@ export default function IntelligenceDashboard() {
         ]} insights={stockInt.insights} />
       </div>
 
+      <PredictiveCenter />
       <SignalIntelligence />
       <MarketNews />
     </div>
