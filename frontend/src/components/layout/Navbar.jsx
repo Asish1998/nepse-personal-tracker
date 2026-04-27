@@ -66,6 +66,12 @@ export default function Navbar({ active, onChange }) {
               <button onClick={handleLogout} style={styles.logoutBtn}>
                 Logout
               </button>
+              <button 
+                onClick={() => window.open('/wealth-manager', '_blank')} 
+                style={styles.wealthBtn}
+              >
+                💰 Wealth Manager
+              </button>
             </div>
           )}
 
@@ -107,10 +113,17 @@ export default function Navbar({ active, onChange }) {
                 </button>
                 <button 
                   className="btn-secondary" 
-                  style={{ width: '100%', color: 'var(--loss)', borderColor: 'var(--loss)' }}
+                  style={{ width: '100%', color: 'var(--loss)', borderColor: 'var(--loss)', marginBottom: 12 }}
                   onClick={handleLogout}
                 >
                   Logout
+                </button>
+                <button 
+                  className="btn-primary" 
+                  style={{ width: '100%', background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)', border: 'none' }}
+                  onClick={() => { window.open('/wealth-manager', '_blank'); setIsMenuOpen(false); }}
+                >
+                  💰 Wealth Manager
                 </button>
               </div>
             )}
@@ -250,6 +263,18 @@ const styles = {
     transition: 'all 0.2s',
     textTransform: 'none',
     letterSpacing: '0',
+  },
+  wealthBtn: {
+    background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '8px 16px',
+    fontSize: '12px',
+    fontWeight: '800',
+    cursor: 'pointer',
+    boxShadow: '0 4px 10px rgba(251, 191, 36, 0.25)',
+    transition: 'transform 0.2s',
   },
   menuBtn: {
     display: 'none', // Overwritten by CSS in index.css for mobile

@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import StockDetails from './pages/StockDetails'
+import WealthManager from './pages/WealthManager'
 
 import SecurityGateway from './components/auth/SecurityGateway'
 
@@ -36,6 +37,7 @@ function App() {
           <Route element={<ProtectedLayout />}>
             <Route path="/"         element={<Dashboard />} />
             <Route path="/stock/:symbol" element={<StockDetails />} />
+            <Route path="/wealth-manager" element={<WealthManager />} />
           </Route>
           
           <Route path="*"         element={<Navigate to="/" />} />
