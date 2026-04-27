@@ -120,6 +120,24 @@ export default function Register() {
           </Link>
         </p>
       </div>
+
+      {/* Designer Credit */}
+      <div style={{
+        position: 'fixed',
+        bottom: '24px',
+        width: '100%',
+        textAlign: 'center',
+        color: 'var(--text-muted)',
+        fontSize: '12px',
+        fontWeight: '700',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        opacity: 0.4,
+        pointerEvents: 'none',
+        zIndex: 1
+      }}>
+        Created & Designed by Ashish
+      </div>
     </div>
   )
 }
