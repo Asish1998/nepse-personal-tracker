@@ -8,6 +8,7 @@ import { tellGemini } from '../../utils/aiClient'
 import MarketNews from './MarketNews'
 import SignalIntelligence from './SignalIntelligence'
 import PredictiveCenter from './PredictiveCenter'
+import PriceForecaster from './PriceForecaster'
 
 function MetricCard({ title, value, sub, colorClass = 'text-main' }) {
   return (
@@ -116,6 +117,7 @@ export default function IntelligenceDashboard() {
         ]} insights={stockInt.insights} />
       </div>
 
+      <PriceForecaster />
       <PredictiveCenter />
       <SignalIntelligence />
       <MarketNews />
