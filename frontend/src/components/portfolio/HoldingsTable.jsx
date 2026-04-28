@@ -75,6 +75,7 @@ export default function HoldingsTable() {
     { label: 'Daily', key: 'dailyPL' },
     { label: 'Overall', key: 'pl' },
     { label: 'Market Value', key: 'mktValue' },
+    { label: 'Tax', key: null },
     { label: 'Actions', key: null },
   ]
 
@@ -147,6 +148,34 @@ export default function HoldingsTable() {
                   {h.pl > 0 ? '+' : ''}{fmtNPR(h.pl, 0)}
                 </td>
                 <td style={{ fontWeight: 700 }}>{fmtNPR(h.mktValue, 0)}</td>
+                <td>
+                  {(() => {
+                    const buyDate = new Date(h.date || Date.now())
+                    const diff = Math.floor((new Date() - buyDate) / (1000 * 60 * 60 * 24))
+                    const isLong = diff >= 365
+                    const daysColor = isLong ? 'var(--profit)' : 'var(--text-muted)'
+                    
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <span style={{ 
+                          fontSize: 10, 
+                          fontWeight: 800, 
+                          padding: '2px 6px', 
+                          borderRadius: 4, 
+                          background: isLong ? 'rgba(0,192,118,0.1)' : 'rgba(239,68,68,0.1)', 
+                          color: isLong ? 'var(--profit)' : 'var(--loss)',
+                          width: 'fit-content'
+                        }}>
+                          {isLong ? 'LT (5%)' : 'ST (7.5%)'}
+                        </span>
+                        <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 600 }}>
+                          {diff}d held
+                          {!isLong && ` · ${365 - diff}d to LT`}
+                        </span>
+                      </div>
+                    )
+                  })()}
+                </td>
                 <td>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button

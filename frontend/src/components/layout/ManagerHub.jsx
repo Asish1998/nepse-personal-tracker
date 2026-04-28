@@ -2,6 +2,7 @@ import SecuritySettings from '../auth/SecuritySettings'
 import JournalManager from '../journal/JournalManager'
 import AlertsManager from '../alerts/AlertsManager'
 import WatchlistManager from '../watchlist/WatchlistManager'
+import CorporateActionScanner from '../portfolio/CorporateActionScanner'
 
 export default function ManagerHub() {
   return (
@@ -20,6 +21,16 @@ export default function ManagerHub() {
             </div>
             <div style={styles.cardWrapper}>
               <JournalManager />
+            </div>
+
+            <div style={{ marginTop: '40px' }} />
+            
+            <div style={styles.sectionHeader}>
+              <span style={styles.sectionIcon}>📢</span>
+              <h2 style={styles.sectionTitle}>Corporate Actions</h2>
+            </div>
+            <div style={styles.cardWrapper}>
+              <CorporateActionScanner />
             </div>
           </div>
           

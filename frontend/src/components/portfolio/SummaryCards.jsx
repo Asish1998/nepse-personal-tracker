@@ -49,7 +49,23 @@ export default function SummaryCards() {
   const totalPL      = unrealizedPL + realized.profit
   const netWorth     = unrealized.value 
   const totalFees    = unrealized.fees + realized.fees + realized.buyFees
+  
+  // Calculate Potential Tax Liability (Unrealized)
+  const potentialTax = state.holdings.reduce((acc, h) => {
+    const { totalCost } = effectiveBuyCost(h.qty, h.buy)
+    const curValue = h.qty * h.cur
+    const profit = curValue - totalCost
+    if (profit <= 0) return acc
+
+    // Logic: calculate holding days
+    const buyDate = new Date(h.date || Date.now())
+    const diff = Math.floor((new Date() - buyDate) / (1000 * 60 * 60 * 24))
+    const rate = diff >= 365 ? 0.05 : 0.075
+    return acc + (profit * rate)
+  }, 0)
+
   const realNetPL    = totalPL - totalFees
+  const realizable   = netWorth - potentialTax
 
   // Actual days gain calculation
   const daysGain = state.holdings.reduce((acc, h) => {
@@ -59,11 +75,11 @@ export default function SummaryCards() {
 
   const cards = [
     { label: 'Networth',        value: `NPR ${fmtNPR(netWorth)}`, bold: true, color: 'var(--primary)' },
-    { label: 'Investment',      value: `NPR ${fmtNPR(unrealized.invested)}` },
+    { label: 'Realizable Value', value: `NPR ${fmtNPR(realizable)}`, color: 'var(--accent)', sub: 'After Potential CGT' },
     { label: 'Overall Gain',    value: `${totalPL >= 0 ? '+' : ''}NPR ${fmtNPR(totalPL)}`, color: totalPL >= 0 ? 'var(--profit)' : 'var(--loss)' },
     { label: 'Days Gain',       value: `NPR ${fmtNPR(daysGain)}`, color: daysGain >= 0 ? 'var(--profit)' : 'var(--loss)' },
+    { label: 'Potential CGT',   value: `NPR ${fmtNPR(potentialTax)}`, color: 'var(--loss)', sub: 'Unrealized Tax' },
     { label: 'Total Net P/L',   value: `${realNetPL >= 0 ? '+' : ''}NPR ${fmtNPR(realNetPL)}`, color: realNetPL >= 0 ? 'var(--profit)' : 'var(--loss)', bold: true },
-    { label: 'Total Fees Paid', value: `NPR ${fmtNPR(totalFees)}`, color: 'var(--warn)' },
   ]
 
   return (
@@ -72,6 +88,7 @@ export default function SummaryCards() {
         <div key={c.label} className="card" style={{ ...styles.card, border: c.bold ? '2px solid var(--primary)' : '1px solid var(--border)' }}>
           <div style={styles.label}>{c.label}</div>
           <div style={{ ...styles.value, color: c.color || 'var(--text-main)', fontSize: c.bold ? 19 : 17 }}>{c.value}</div>
+          {c.sub && <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px', fontWeight: '600' }}>{c.sub}</div>}
         </div>
       ))}
     </div>
