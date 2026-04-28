@@ -1,5 +1,6 @@
-import { createContext, useContext, useReducer, useEffect, useState } from 'react'
+import { createContext, useContext, useReducer, useEffect, useState, useRef } from 'react'
 import { encryptData, decryptData } from '../utils/cryptoUtils'
+import { syncTradeToWealth } from '../utils/wealthSync'
 
 const AppContext = createContext(null)
 
@@ -286,6 +287,26 @@ export function AppProvider({ children, storageKey = 'nepse_base_v2' }) {
       sessionStorage.setItem(`pin_${storageKey}`, state.masterPin)
     }
   }, [state, storageKey])
+
+  // ── Wealth Manager Sync Logic ─────────────────────
+  const prevTradesLen = useRef(state.trades.length)
+  useEffect(() => {
+    if (state.isLocked) return
+    if (state.trades.length > prevTradesLen.current) {
+      const latest = state.trades[0]
+      if (latest && latest.type === 'SELL') {
+        // Derive profit for wealth sync
+        // Buy Basis = Qty * BuyPrice + BuyFees (Heuristic: 0.35% for buy fees)
+        const buyBasis = (latest.qty * latest.buyPrice) * 1.0035
+        const profit = latest.net - buyBasis
+        
+        // Use a generic userID or derive from storageKey
+        const userId = storageKey.split('_').pop()
+        syncTradeToWealth(userId, { ...latest, profit })
+      }
+    }
+    prevTradesLen.current = state.trades.length
+  }, [state.trades, state.isLocked, storageKey])
 
   // ── Alert Monitoring Logic ────────────────────────
   useEffect(() => {

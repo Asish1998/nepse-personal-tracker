@@ -9,6 +9,7 @@ import MarketNews from './MarketNews'
 import SignalIntelligence from './SignalIntelligence'
 import PredictiveCenter from './PredictiveCenter'
 import PriceForecaster from './PriceForecaster'
+import IPOCalendar from './IPOCalendar'
 
 function MetricCard({ title, value, sub, colorClass = 'text-main' }) {
   return (
@@ -95,6 +96,9 @@ export default function IntelligenceDashboard() {
       )}
 
       <MarketSentiment />
+      <div style={{ padding: '16px 0' }}></div>
+
+      <IPOCalendar />
       <div style={{ padding: '16px 0' }}></div>
 
       <div className="intelligence-grid" style={styles.grid}>
