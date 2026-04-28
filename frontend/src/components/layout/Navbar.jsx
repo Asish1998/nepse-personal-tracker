@@ -63,15 +63,17 @@ export default function Navbar({ active, onChange }) {
                 <div style={styles.userName}>{user.name}</div>
                 <div style={styles.userEmail}>{user.email}</div>
               </div>
-              <button onClick={handleLogout} style={styles.logoutBtn}>
-                Logout
-              </button>
-              <button 
-                onClick={() => window.open('/wealth-manager', '_blank')} 
-                style={styles.wealthBtn}
-              >
-                💰 Wealth Manager
-              </button>
+              <div style={styles.actionColumn}>
+                <button onClick={handleLogout} style={styles.logoutBtn}>
+                  Logout
+                </button>
+                <button 
+                  onClick={() => window.open('/wealth-manager', '_blank')} 
+                  style={styles.wealthBtn}
+                >
+                  💰 Wealth Manager
+                </button>
+              </div>
             </div>
           )}
 
@@ -120,7 +122,7 @@ export default function Navbar({ active, onChange }) {
                 </button>
                 <button 
                   className="btn-primary" 
-                  style={{ width: '100%', background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)', border: 'none' }}
+                  style={{ width: '100%', background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)', border: 'none', padding: '10px', fontSize: '13px' }}
                   onClick={() => { window.open('/wealth-manager', '_blank'); setIsMenuOpen(false); }}
                 >
                   💰 Wealth Manager
@@ -263,18 +265,26 @@ const styles = {
     transition: 'all 0.2s',
     textTransform: 'none',
     letterSpacing: '0',
+    width: '100%',
+  },
+  actionColumn: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    minWidth: '120px',
   },
   wealthBtn: {
     background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
-    padding: '8px 16px',
-    fontSize: '12px',
+    borderRadius: '6px',
+    padding: '4px 10px',
+    fontSize: '10px',
     fontWeight: '800',
     cursor: 'pointer',
-    boxShadow: '0 4px 10px rgba(251, 191, 36, 0.25)',
+    boxShadow: '0 2px 6px rgba(251, 191, 36, 0.2)',
     transition: 'transform 0.2s',
+    whiteSpace: 'nowrap',
   },
   menuBtn: {
     display: 'none', // Overwritten by CSS in index.css for mobile
@@ -294,12 +304,12 @@ const styles = {
     background: 'var(--bg-main)',
     zIndex: 99,
     padding: '24px',
-    animation: 'fadeIn 0.2s ease-out'
+    animation: 'fadeIn 0.2s ease-out',
   },
   mobileContent: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px'
+    gap: '12px',
   },
   mobileTab: {
     width: '100%',
@@ -311,11 +321,11 @@ const styles = {
     fontSize: '16px',
     fontWeight: '700',
     color: 'var(--text-main)',
-    cursor: 'pointer'
+    cursor: 'pointer',
   },
   mobileTabActive: {
     background: 'var(--primary)',
     color: 'white',
-    borderColor: 'var(--primary)'
-  }
+    borderColor: 'var(--primary)',
+  },
 }
