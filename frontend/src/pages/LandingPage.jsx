@@ -40,8 +40,8 @@ export default function LandingPage() {
       
       <nav style={styles.nav}>
         <div style={styles.logo}>
-          <div style={styles.logoIcon}>α</div>
-          <span style={styles.logoText}>ALPHA TERMINAL</span>
+          <div style={styles.logoIcon}>A</div>
+          <span style={styles.logoText}>ASTRIX ALPHA</span>
         </div>
         <div style={styles.navLinks}>
           <button style={styles.loginBtn} onClick={() => navigate('/login')}>Sign In</button>
@@ -54,15 +54,15 @@ export default function LandingPage() {
         <section style={styles.heroSection}>
           <div style={styles.heroContent} className="fade-up">
             <div style={styles.badge}>PRECISION FINTECH PROTOCOL</div>
-            <h1 style={styles.title}>The Alpha Edge for <br /> <span style={styles.gradientText}>NEPSE Investors</span></h1>
+            <h1 style={styles.title}>The Astrix Edge for <br /> <span style={styles.gradientText}>NEPSE Portfolios</span></h1>
             <p style={styles.subtitle}>
-              Dominate the Nepal Stock Market with institutional-grade tools. 
-              Real-time WACC tracking, Neural signals, and advanced wealth protocols in one unified terminal.
+              Unleash the power of the Astrix Alpha protocol. 
+              The most advanced high-frequency NEPSE terminal with neural signals and unified wealth intelligence.
             </p>
             <div style={styles.ctaGroup}>
-              <button style={styles.mainCta} onClick={() => navigate('/register')}>Join 12k+ Active Traders</button>
+              <button style={styles.mainCta} onClick={() => navigate('/register')}>Join 100+ Active Traders</button>
               <button style={styles.secondaryCta} onClick={() => document.getElementById('why-choose-us').scrollIntoView({ behavior: 'smooth' })}>
-                Why Alpha Terminal?
+                Why Astrix Alpha?
               </button>
             </div>
           </div>
@@ -85,7 +85,7 @@ export default function LandingPage() {
         {/* WHY CHOOSE US SECTION */}
         <section id="why-choose-us" style={styles.features}>
           <div style={styles.sectionHeader} className="fade-up">
-            <h2 style={styles.sectionTitle}>Why Choose Alpha Terminal?</h2>
+            <h2 style={styles.sectionTitle}>Why Choose Astrix Alpha?</h2>
             <p style={styles.sectionSub}>Engineered for those who treat NEPSE as a professional discipline, not a game of chance.</p>
             <div style={styles.sectionLine}></div>
           </div>
@@ -129,7 +129,7 @@ export default function LandingPage() {
             <div style={styles.compHeader}>
               <div style={styles.compCol}>Decision Matrix</div>
               <div style={styles.compCol}>Normal Investor</div>
-              <div style={{ ...styles.compCol, color: '#00f2ff' }}>Alpha Terminal User</div>
+              <div style={{ ...styles.compCol, color: '#00f2ff' }}>Astrix Alpha User</div>
             </div>
             
             <ComparisonRow label="Trade Rationale" normal="Guessing & Rumors" alpha="Data-Driven AI Intelligence" />
@@ -147,8 +147,8 @@ export default function LandingPage() {
 
         <footer style={styles.footer}>
           <div style={styles.footerBrand}>
-            <div style={styles.logoIconSmall}>α</div>
-            <span>Alpha Terminal v3.0 // Unified Finance Protocol</span>
+            <div style={styles.logoIconSmall}>A</div>
+            <span>Astrix Alpha v4.0 // Global Wealth Protocol</span>
           </div>
           <p style={styles.footerText}>© 2026 Developed by Ashish Khanal. Audited Financial Intelligence for the Nepalese Market.</p>
         </footer>

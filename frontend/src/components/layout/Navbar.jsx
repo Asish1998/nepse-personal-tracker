@@ -40,11 +40,11 @@ export default function Navbar({ active, onChange }) {
         <div style={styles.leftSection}>
           <div style={styles.brand} onClick={() => handleTabChange('home')}>
             <div style={styles.logoBox}>
-              <span style={{ color: 'white', fontWeight: 800, fontSize: 13, letterSpacing: '0.05em' }}>AK</span>
+              <span style={{ color: 'white', fontWeight: 900, fontSize: 20, letterSpacing: '0.05em' }}>A</span>
             </div>
             <div style={styles.brandText}>
-              <div style={styles.brandName}>Personal Tracker</div>
-              <div style={styles.brandSub}>NEPSE · Portfolio Manager</div>
+              <div style={styles.brandName}>Astrix Alpha</div>
+              <div style={styles.brandSub}>Global Unified Finance Protocol</div>
             </div>
           </div>
           
