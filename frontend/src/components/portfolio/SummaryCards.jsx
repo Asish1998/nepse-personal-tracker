@@ -10,12 +10,13 @@ export default function SummaryCards() {
   // Unrealized (Current Holdings)
   const unrealized = state.holdings.reduce(
     (acc, h) => {
-      const totalCost = h.inv || (h.qty * h.buy)
-      const curValue = h.qty * h.cur
+      const curPrice = h.cur || h.buy || 0
+      const totalCost = h.inv || (h.qty * h.buy) || 0
+      const curValue = h.qty * curPrice
       
       acc.invested += totalCost
       acc.value    += curValue
-      acc.fees     += (h.inv && h.buy ? (h.inv - (h.qty * h.buy)) : 0)
+      acc.fees     += (h.inv && h.buy ? Math.max(0, h.inv - (h.qty * h.buy)) : 0)
       return acc
     },
     { invested: 0, value: 0, fees: 0 }
@@ -46,8 +47,9 @@ export default function SummaryCards() {
   
   // Calculate Potential Tax Liability (Unrealized)
   const potentialTax = state.holdings.reduce((acc, h) => {
+    const curPrice = h.cur || h.buy || 0
     const totalCost = h.inv || (h.qty * h.buy)
-    const curValue = h.qty * h.cur
+    const curValue = h.qty * curPrice
     const profit = curValue - totalCost
     if (profit <= 0) return acc
 
@@ -62,9 +64,9 @@ export default function SummaryCards() {
 
   // Actual days gain calculation
   const daysGain = state.holdings.reduce((acc, h) => {
-    // If we have a 'prev' price from the API update, use it. 
-    // Otherwise fallback to 0 until the first price tick occurs.
-    const change = h.prev ? (h.cur - h.prev) : 0
+    const curP = h.cur || h.buy || 0
+    const prevP = h.prev || curP
+    const change = curP - prevP
     return acc + (change * h.qty)
   }, 0)
 
