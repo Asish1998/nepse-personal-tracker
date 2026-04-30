@@ -7,29 +7,28 @@ export default function SummaryCards() {
 
   // Unrealized (Current Holdings)
   // Unrealized (Current Holdings)
+  // Unrealized (Current Holdings)
   const unrealized = state.holdings.reduce(
     (acc, h) => {
-      // Use the persisted total cost basis (inv) which now strictly includes buy fees
       const totalCost = h.inv || (h.qty * h.buy)
       const curValue = h.qty * h.cur
       
       acc.invested += totalCost
       acc.value    += curValue
+      acc.fees     += (h.inv && h.buy ? (h.inv - (h.qty * h.buy)) : 0)
       return acc
     },
-    { invested: 0, value: 0 }
+    { invested: 0, value: 0, fees: 0 }
   )
 
   // Realized (Sold Trades)
   const realized = state.trades.reduce(
     (acc, t) => {
       if (t.type === 'SELL') {
-        // Realized Profit = Net Inflow (after fees) - Original WACC Basis Outflow
-        // We now store 'basisTotal' in the trade record for perfect tracking
         const originalBasis = t.basisTotal || (t.qty * (t.buyPrice || 0))
         const profit = t.net - originalBasis
         acc.profit += profit
-        acc.fees   += t.fees
+        acc.fees   += (t.fees || 0)
       } else if (t.type === 'BUY') {
         acc.buyFees += (t.fees || 0)
       }
@@ -43,29 +42,30 @@ export default function SummaryCards() {
   const unrealizedPL = unrealized.value - unrealized.invested
   const totalPL      = unrealizedPL + realized.profit
   const netWorth     = unrealized.value 
-  const totalFees    = unrealized.fees + realized.fees + realized.buyFees
+  const totalFees    = (unrealized.fees || 0) + (realized.fees || 0) + (realized.buyFees || 0)
   
   // Calculate Potential Tax Liability (Unrealized)
   const potentialTax = state.holdings.reduce((acc, h) => {
-    const { totalCost } = effectiveBuyCost(h.qty, h.buy)
+    const totalCost = h.inv || (h.qty * h.buy)
     const curValue = h.qty * h.cur
     const profit = curValue - totalCost
     if (profit <= 0) return acc
 
-    // Logic: calculate holding days
     const buyDate = new Date(h.date || Date.now())
-    const diff = Math.floor((new Date() - buyDate) / (1000 * 60 * 60 * 24))
+    const diff = Math.floor((Date.now() - buyDate) / (1000 * 60 * 60 * 24))
     const rate = diff >= 365 ? 0.05 : 0.075
     return acc + (profit * rate)
   }, 0)
 
-  const realNetPL    = totalPL - totalFees
+  const realNetPL    = (totalPL || 0) - (totalFees || 0)
   const realizable   = netWorth - potentialTax
 
   // Actual days gain calculation
   const daysGain = state.holdings.reduce((acc, h) => {
-    const prev = h.prev || h.cur // fallback if no prev close
-    return acc + (h.cur - prev) * h.qty
+    // If we have a 'prev' price from the API update, use it. 
+    // Otherwise fallback to 0 until the first price tick occurs.
+    const change = h.prev ? (h.cur - h.prev) : 0
+    return acc + (change * h.qty)
   }, 0)
 
   const cards = [
@@ -73,7 +73,7 @@ export default function SummaryCards() {
     { label: 'Total Investment', value: `NPR ${fmtNPR(unrealized.invested)}`, color: 'var(--text-main)', sub: 'Cost Basis' },
     { label: 'Realizable Value', value: `NPR ${fmtNPR(realizable)}`, color: 'var(--accent)', sub: 'After Potential CGT' },
     { label: 'Overall Gain',    value: `${totalPL >= 0 ? '+' : ''}NPR ${fmtNPR(totalPL)}`, color: totalPL >= 0 ? 'var(--profit)' : 'var(--loss)' },
-    { label: 'Days Gain',       value: `NPR ${fmtNPR(daysGain)}`, color: daysGain >= 0 ? 'var(--profit)' : 'var(--loss)' },
+    { label: 'Days Gain',       value: `${daysGain >= 0 ? '+' : ''}NPR ${fmtNPR(daysGain)}`, color: daysGain >= 0 ? 'var(--profit)' : 'var(--loss)' },
     { label: 'Total Net P/L',   value: `${realNetPL >= 0 ? '+' : ''}NPR ${fmtNPR(realNetPL)}`, color: realNetPL >= 0 ? 'var(--profit)' : 'var(--loss)', bold: true },
   ]
 

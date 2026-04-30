@@ -75,9 +75,9 @@ function reducer(state, action) {
       let changed = false
       const nextHoldings = state.holdings.map(h => {
         const update = action.payload[h.sym]
-        if (update && update !== h.cur) {
+        if (update && (update.cur !== h.cur || update.prev !== h.prev)) {
           changed = true
-          return { ...h, cur: update, prev: h.cur }
+          return { ...h, cur: update.cur, prev: update.prev }
         }
         return h
       })
@@ -188,7 +188,13 @@ export function AppProvider({ children }) {
         for (const item of symbolsData) {
           const sym = (item.symbol || '').toUpperCase()
           const ltp = item.ltp ?? item.price
-          if (sym && ltp) priceMap[sym] = parseFloat(ltp)
+          const change = item.change ?? 0
+          if (sym && ltp) {
+            priceMap[sym] = { 
+              cur: parseFloat(ltp), 
+              prev: parseFloat(ltp) - parseFloat(change) 
+            }
+          }
         }
         dispatch({ type: 'UPDATE_HOLDINGS_PRICES_BULK', payload: priceMap })
       } catch (err) {}
