@@ -108,8 +108,19 @@ function reducer(state, action) {
       return { ...state, holdings: mergeHoldings(state.holdings, action.payload) }
     case 'CLEAR_IMPORTED_HOLDINGS':
       return { ...state, holdings: state.holdings.filter(h => !h.isImported) }
+    case 'ADD_WATCH':
+      return { ...state, watchlist: [...new Set([...state.watchlist, action.payload])] }
+    case 'REMOVE_WATCH':
+      return { ...state, watchlist: state.watchlist.filter(s => s !== action.payload) }
+    case 'ADD_ALERT':
+      return { ...state, alerts: [action.payload, ...state.alerts] }
+    case 'DELETE_ALERT':
+      return { ...state, alerts: state.alerts.filter(a => a.id !== action.payload) }
+    case 'UPDATE_EMAIL_CONFIG':
+      return { ...state, emailConfig: { ...state.emailConfig, ...action.payload } }
     default:
       return state
+
   }
 }
 

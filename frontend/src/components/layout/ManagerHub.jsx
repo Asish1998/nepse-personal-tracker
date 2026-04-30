@@ -68,65 +68,80 @@ const styles = {
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
-    padding: '0 24px'
+    background: 'var(--bg-main)',
+    minHeight: '100vh',
   },
   container: {
     width: '100%',
-    maxWidth: '1440px',
-    padding: '32px 0'
+    maxWidth: '1400px',
+    padding: '48px 40px',
   },
   header: {
-    marginBottom: '40px'
+    marginBottom: '48px',
   },
   title: {
-    fontSize: '34px',
-    fontWeight: '850',
+    fontSize: '36px',
+    fontWeight: '900',
     color: 'var(--text-main)',
     margin: 0,
-    letterSpacing: '-0.03em'
+    letterSpacing: '-0.05em',
   },
   subtitle: {
-    fontSize: '16px',
+    fontSize: '15px',
     color: 'var(--text-muted)',
-    marginTop: '10px'
+    marginTop: '8px',
+    fontWeight: '500',
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) 420px',
-    gap: '40px',
-    alignItems: 'start'
+    gridTemplateColumns: 'minmax(0, 1fr) 400px',
+    gap: '48px',
+    alignItems: 'start',
   },
   columnMain: {
-    minWidth: 0, // critical for grid flex items
+    minWidth: 0,
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    gap: '40px',
   },
   columnSide: {
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    gap: '32px',
   },
   sticky: {
     position: 'sticky',
-    top: '120px'
+    top: '100px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '32px',
   },
   sectionHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: 16,
     marginBottom: '20px',
-    paddingLeft: '4px'
   },
   sectionIcon: {
-    fontSize: '22px'
+    width: '40px',
+    height: '40px',
+    background: 'var(--bg-card)',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '18px',
+    boxShadow: 'var(--shadow-sm)',
+    border: '1px solid var(--border)',
   },
   sectionTitle: {
-    fontSize: '20px',
-    fontWeight: '700',
+    fontSize: '18px',
+    fontWeight: '800',
     color: 'var(--text-main)',
-    margin: 0
+    margin: 0,
+    letterSpacing: '-0.02em',
   },
   cardWrapper: {
     width: '100%',
-    overflow: 'hidden'
   }
 }
