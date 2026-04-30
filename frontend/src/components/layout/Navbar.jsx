@@ -38,7 +38,7 @@ export default function Navbar({ active, onChange }) {
     <>
       <header className="navbar-container" style={styles.header}>
         <div style={styles.leftSection}>
-          <div style={styles.brand}>
+          <div style={styles.brand} onClick={() => handleTabChange('home')}>
             <div style={styles.logoBox}>
               <span style={{ color: 'white', fontWeight: 800, fontSize: 13, letterSpacing: '0.05em' }}>AK</span>
             </div>
