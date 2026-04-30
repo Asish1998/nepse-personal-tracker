@@ -68,10 +68,18 @@ export default function Navbar({ active, onChange }) {
           {user && (
             <div className="desktop-user" style={styles.userSection}>
               <div style={styles.userInfo}>
-                <div style={styles.userName}>{user.name}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ 
+                    width: 8, height: 8, borderRadius: '50%', 
+                    background: supabase ? 'var(--profit)' : 'var(--text-muted)',
+                    title: supabase ? 'Cloud Synced' : 'Local Mode (No Supabase)'
+                  }} />
+                  <div style={styles.userName}>{user.name}</div>
+                </div>
                 <div style={styles.userEmail}>{user.email}</div>
               </div>
               <div style={styles.actionColumn}>
+
                 <button onClick={handleLogout} style={styles.logoutBtn}>
                   Logout
                 </button>

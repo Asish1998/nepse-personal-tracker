@@ -13,8 +13,10 @@ const initialState = {
   emailConfig: { enabled: false },
   aiConfig: { geminiKey: import.meta.env.VITE_GEMINI_API_KEY || '' },
   familyBOIDs: [],
-  isPending: false // Added for account review logic
+  isPending: false, // Added for account review logic
+  isCloudSynced: false
 }
+
 
 function reducer(state, action) {
   // WACC Merge Logic
@@ -112,8 +114,9 @@ function reducer(state, action) {
 }
 
 export function AppProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const [state, dispatch] = useReducer(reducer, { ...initialState, isCloudSynced: !!supabase })
   const { user } = useAuth()
+
   const initialFetchRef = useRef(false)
 
   // 1. Load Data from Supabase
@@ -132,10 +135,11 @@ export function AppProvider({ children }) {
           .single()
 
         if (!error && data) {
-          dispatch({ type: 'SET_INITIAL_STATE', payload: data.content })
+          dispatch({ type: 'SET_INITIAL_STATE', payload: { ...data.content, isCloudSynced: true } })
         }
         initialFetchRef.current = true
       }
+
       loadUserContent()
     }
   }, [user])

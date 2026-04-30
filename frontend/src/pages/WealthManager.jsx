@@ -19,6 +19,10 @@ export default function WealthManager() {
     return saved ? JSON.parse(saved) : []
   })
 
+  const [budget, setBudget] = useState(() => {
+    return parseFloat(localStorage.getItem(`wealth_budget_${user?.id}`)) || 50000
+  })
+
   const [form, setForm] = useState({
     type: 'EXPENSE',
     category: CATEGORIES.EXPENSE[0],
@@ -27,9 +31,12 @@ export default function WealthManager() {
     note: ''
   })
 
+
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(transactions))
-  }, [transactions, storageKey])
+    localStorage.setItem(`wealth_budget_${user?.id}`, budget.toString())
+  }, [transactions, budget, storageKey, user?.id])
+
 
   const totals = useMemo(() => {
     return transactions.reduce((acc, t) => {
@@ -63,6 +70,25 @@ export default function WealthManager() {
     }
   }
 
+  const downloadCSV = () => {
+    const headers = ['Date', 'Type', 'Category', 'Amount', 'Note']
+    const rows = transactions.map(t => [t.date, t.type, t.category, t.amount, t.note])
+    const csvContent = [headers, ...rows].map(e => e.join(',')).join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', `wealth_report_${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const budgetUsage = (totals.expense / budget) * 100
+  const isOverBudget = totals.expense > budget
+
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -81,11 +107,29 @@ export default function WealthManager() {
           <div style={styles.label}>Total Monthly Income</div>
           <div style={{ ...styles.value, color: 'var(--profit)' }}>{fmtNPR(totals.income)}</div>
         </div>
-        <div className="card" style={styles.statCard}>
-          <div style={styles.label}>Total Monthly Expense</div>
-          <div style={{ ...styles.value, color: 'var(--loss)' }}>{fmtNPR(totals.expense)}</div>
+        <div className="card" style={{ ...styles.statCard, border: isOverBudget ? '1px solid var(--loss)' : '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <div style={styles.label}>Monthly Budget Usage</div>
+            <input 
+              type="number" 
+              value={budget} 
+              onChange={(e) => setBudget(parseFloat(e.target.value) || 0)}
+              style={styles.budgetInput}
+              title="Click to edit budget"
+            />
+          </div>
+          <div style={styles.progressContainer}>
+            <div style={{ ...styles.progressBar, width: `${Math.min(budgetUsage, 100)}%`, background: isOverBudget ? 'var(--loss)' : 'var(--profit)' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '11px', fontWeight: '700' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Spent: {fmtNPR(totals.expense)}</span>
+            <span style={{ color: isOverBudget ? 'var(--loss)' : 'var(--success)' }}>
+              {isOverBudget ? `Over by ${fmtNPR(totals.expense - budget)}` : `${Math.round(budgetUsage)}% used`}
+            </span>
+          </div>
         </div>
       </div>
+
 
       <div style={styles.mainGrid}>
         <div className="card" style={styles.formCard}>
@@ -181,8 +225,14 @@ export default function WealthManager() {
       </div>
 
       <div className="card" style={{ marginTop: '24px', padding: '24px' }}>
-        <h2 style={styles.sectionTitle}>Recent Transactions</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2 style={styles.sectionTitle}>Recent Transactions</h2>
+          <button onClick={downloadCSV} style={styles.exportBtn}>
+            📥 Export CSV
+          </button>
+        </div>
         <div className="table-container">
+
           <table>
             <thead>
               <tr>
@@ -259,5 +309,10 @@ const styles = {
   field: { display: 'flex', flexDirection: 'column', gap: '6px' },
   inputLabel: { fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)' },
   input: { padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '14px' },
-  select: { padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '14px', cursor: 'pointer' }
+  select: { padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '14px', cursor: 'pointer' },
+  budgetInput: { background: 'none', border: 'none', borderBottom: '1px dashed var(--border)', color: 'var(--text-main)', fontWeight: '800', width: '100px', textAlign: 'right', fontSize: '12px', outline: 'none' },
+  progressContainer: { width: '100%', height: '8px', background: 'var(--bg-main)', borderRadius: '4px', overflow: 'hidden', marginTop: '4px' },
+  progressBar: { height: '100%', transition: 'width 0.3s ease' },
+  exportBtn: { background: 'none', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: '700' }
 }
+
