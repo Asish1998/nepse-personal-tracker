@@ -61,14 +61,7 @@ export default function Navbar({ active, onChange }) {
           </nav>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button 
-            onClick={toggleTheme} 
-            style={styles.themeToggle} 
-            title={theme === 'light' ? 'Switch to Dark' : 'Switch to Light'}
-          >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {user && (
             <div className="desktop-user" style={styles.userSection}>
               <div style={styles.userInfo}>
@@ -103,6 +96,13 @@ export default function Navbar({ active, onChange }) {
               </div>
             </div>
           )}
+          <button 
+            onClick={toggleTheme} 
+            style={styles.themeToggle} 
+            title={theme === 'light' ? 'Switch to Dark' : 'Switch to Light'}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
         </div>
       </header>
 
@@ -247,15 +247,15 @@ const styles = {
   themeToggle: {
     background: 'var(--bg-card)',
     border: '1px solid var(--border)',
-    fontSize: '18px',
-    width: '40px',
-    height: '40px',
+    fontSize: '16px',
+    width: '36px',
+    height: '36px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '12px',
+    borderRadius: '10px',
     cursor: 'pointer',
     transition: 'var(--transition)',
-    boxShadow: 'var(--shadow-sm)',
+    marginLeft: '8px'
   },
 }
