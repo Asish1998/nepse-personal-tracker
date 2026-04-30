@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { fmtNPR } from '../../utils/formatters'
+
 
 export default function MarketIntelligence({ onNavigate }) {
   const { state } = useApp()
