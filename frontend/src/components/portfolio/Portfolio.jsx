@@ -4,7 +4,9 @@ import HoldingForm   from './HoldingForm'
 import HoldingsTable from './HoldingsTable'
 import PortfolioChart from './PortfolioChart'
 import HoldingIntelligence from './HoldingIntelligence'
+import AIChatbot from '../ai/AIChatbot'
 import { useApp } from '../../context/AppContext'
+import { exportHoldingsToExcel, importHoldingsFromExcel } from '../../utils/excelUtils'
 
 export default function Portfolio() {
   const { state, dispatch } = useApp()
@@ -86,6 +88,7 @@ export default function Portfolio() {
         </div>
       </div>
 
+      <AIChatbot />
     </div>
   )
 }

@@ -2,8 +2,8 @@ import AIChatbot from '../ai/AIChatbot'
 
 export default function Layout({ children }) {
   return (
-    <main style={{ padding: '24px 0', width: '100%', maxWidth: 1200, margin: '0 auto' }}>
-      <div className="glass" style={{ padding: '32px', minHeight: 'calc(100vh - 160px)', margin: '0 24px' }}>
+    <main className="dashboard-main-padding" style={{ padding: '24px 0', width: '100%', maxWidth: 1200, margin: '0 auto' }}>
+      <div className="glass glass-main" style={{ padding: '32px', minHeight: 'calc(100vh - 160px)', margin: '0 24px' }}>
         {children}
       </div>
       <div style={{ marginTop: 64, padding: '40px 24px', backgroundColor: 'rgba(15, 23, 42, 0.02)', borderTop: '1px solid var(--border)', borderRadius: '0 0 var(--radius) var(--radius)', textAlign: 'center' }}>
@@ -18,7 +18,6 @@ export default function Layout({ children }) {
           © 2026 NEPSE PORTFOLIO TRACKER | BUILT FOR EXCELLENCE
         </p>
       </div>
-      <AIChatbot />
     </main>
   )
 }

@@ -1,8 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { fmtNPR } from '../utils/formatters'
-import Navbar from '../components/layout/Navbar'
-import Layout from '../components/layout/Layout'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 
 const CATEGORIES = {
@@ -66,186 +64,179 @@ export default function WealthManager() {
   }
 
   return (
-    <div style={{ background: 'var(--bg-main)', minHeight: '100vh' }}>
-      <Navbar active="wealth" />
-      <Layout>
-        <div style={styles.container}>
-          <div style={styles.header}>
-            <h1 style={styles.title}>Wealth Manager & Expense Tracker</h1>
-            <p style={styles.subtitle}>Localized financial management for your everyday life in Nepal.</p>
-          </div>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h1 style={styles.title}>Wealth Manager & Expense Tracker</h1>
+        <p style={styles.subtitle}>Localized financial management for your everyday life in Nepal.</p>
+      </div>
 
-          <div style={styles.statsGrid}>
-            <div className="card" style={styles.statCard}>
-              <div style={styles.label}>Net Balance</div>
-              <div style={{ ...styles.value, color: (totals.income - totals.expense) >= 0 ? 'var(--profit)' : 'var(--loss)' }}>
-                {fmtNPR(totals.income - totals.expense)}
-              </div>
-            </div>
-            <div className="card" style={styles.statCard}>
-              <div style={styles.label}>Total Monthly Income</div>
-              <div style={{ ...styles.value, color: 'var(--profit)' }}>{fmtNPR(totals.income)}</div>
-            </div>
-            <div className="card" style={styles.statCard}>
-              <div style={styles.label}>Total Monthly Expense</div>
-              <div style={{ ...styles.value, color: 'var(--loss)' }}>{fmtNPR(totals.expense)}</div>
-            </div>
-          </div>
-
-          <div style={styles.mainGrid}>
-            {/* Form Section */}
-            <div className="card" style={styles.formCard}>
-              <h2 style={styles.sectionTitle}>Add Transaction</h2>
-              <form onSubmit={addTransaction} style={styles.form}>
-                <div style={styles.row}>
-                  <div style={styles.field}>
-                    <label style={styles.inputLabel}>Transaction Type</label>
-                    <select 
-                      style={styles.select} 
-                      value={form.type} 
-                      onChange={e => setForm({ ...form, type: e.target.value, category: CATEGORIES[e.target.value][0] })}
-                    >
-                      <option value="EXPENSE">Expense</option>
-                      <option value="INCOME">Income</option>
-                    </select>
-                  </div>
-                  <div style={styles.field}>
-                    <label style={styles.inputLabel}>Category</label>
-                    <select 
-                      style={styles.select} 
-                      value={form.category} 
-                      onChange={e => setForm({ ...form, category: e.target.value })}
-                    >
-                      {CATEGORIES[form.type].map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                <div style={styles.field}>
-                  <label style={styles.inputLabel}>Amount (NPR)</label>
-                  <input 
-                    type="number" 
-                    placeholder="Enter Amount" 
-                    style={styles.input} 
-                    value={form.amount} 
-                    onChange={e => setForm({ ...form, amount: e.target.value })} 
-                  />
-                </div>
-
-                <div style={styles.field}>
-                  <label style={styles.inputLabel}>Date</label>
-                  <input 
-                    type="date" 
-                    style={styles.input} 
-                    value={form.date} 
-                    onChange={e => setForm({ ...form, date: e.target.value })} 
-                  />
-                </div>
-
-                <div style={styles.field}>
-                  <label style={styles.inputLabel}>Note (Optional)</label>
-                  <input 
-                    type="text" 
-                    placeholder="E.g. Lunch at Office" 
-                    style={styles.input} 
-                    value={form.note} 
-                    onChange={e => setForm({ ...form, note: e.target.value })} 
-                  />
-                </div>
-
-                <button type="submit" className="btn-primary" style={{ width: '100%', padding: '12px', marginTop: '12px' }}>
-                  Save Transaction
-                </button>
-              </form>
-            </div>
-
-            {/* Chart Section */}
-            <div className="card" style={styles.chartCard}>
-              <h2 style={styles.sectionTitle}>Expense Breakdown</h2>
-              <div style={{ height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
-                      formatter={(val) => fmtNPR(val)}
-                    />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          <div className="card" style={{ marginTop: '24px', padding: '24px' }}>
-            <h2 style={styles.sectionTitle}>Recent Transactions</h2>
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Note</th>
-                    <th>Amount</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.map(t => (
-                    <tr key={t.id}>
-                      <td style={{ fontSize: '13px' }}>{t.date}</td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ 
-                            width: '8px', 
-                            height: '8px', 
-                            borderRadius: '50%', 
-                            background: t.type === 'INCOME' ? 'var(--profit)' : 'var(--loss)' 
-                          }}></span>
-                          <span style={{ fontWeight: 700 }}>{t.category}</span>
-                        </div>
-                      </td>
-                      <td style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{t.note || '-'}</td>
-                      <td style={{ 
-                        fontFamily: 'var(--mono)', 
-                        fontWeight: 800, 
-                        color: t.type === 'INCOME' ? 'var(--profit)' : 'var(--loss)' 
-                      }}>
-                        {t.type === 'INCOME' ? '+' : '-'}{fmtNPR(t.amount)}
-                      </td>
-                      <td>
-                        <button 
-                          onClick={() => deleteTx(t.id)} 
-                          style={{ background: 'none', border: 'none', color: 'var(--loss)', cursor: 'pointer', fontSize: '18px' }}
-                        >
-                          ×
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {transactions.length === 0 && (
-                    <tr>
-                      <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                        No transactions found. Add your first income or expense above.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+      <div style={styles.statsGrid}>
+        <div className="card" style={styles.statCard}>
+          <div style={styles.label}>Net Balance</div>
+          <div style={{ ...styles.value, color: (totals.income - totals.expense) >= 0 ? 'var(--profit)' : 'var(--loss)' }}>
+            {fmtNPR(totals.income - totals.expense)}
           </div>
         </div>
-      </Layout>
+        <div className="card" style={styles.statCard}>
+          <div style={styles.label}>Total Monthly Income</div>
+          <div style={{ ...styles.value, color: 'var(--profit)' }}>{fmtNPR(totals.income)}</div>
+        </div>
+        <div className="card" style={styles.statCard}>
+          <div style={styles.label}>Total Monthly Expense</div>
+          <div style={{ ...styles.value, color: 'var(--loss)' }}>{fmtNPR(totals.expense)}</div>
+        </div>
+      </div>
+
+      <div style={styles.mainGrid}>
+        <div className="card" style={styles.formCard}>
+          <h2 style={styles.sectionTitle}>Add Transaction</h2>
+          <form onSubmit={addTransaction} style={styles.form}>
+            <div style={styles.row}>
+              <div style={styles.field}>
+                <label style={styles.inputLabel}>Transaction Type</label>
+                <select 
+                  style={styles.select} 
+                  value={form.type} 
+                  onChange={e => setForm({ ...form, type: e.target.value, category: CATEGORIES[e.target.value][0] })}
+                >
+                  <option value="EXPENSE">Expense</option>
+                  <option value="INCOME">Income</option>
+                </select>
+              </div>
+              <div style={styles.field}>
+                <label style={styles.inputLabel}>Category</label>
+                <select 
+                  style={styles.select} 
+                  value={form.category} 
+                  onChange={e => setForm({ ...form, category: e.target.value })}
+                >
+                  {CATEGORIES[form.type].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.inputLabel}>Amount (NPR)</label>
+              <input 
+                type="number" 
+                placeholder="Enter Amount" 
+                style={styles.input} 
+                value={form.amount} 
+                onChange={e => setForm({ ...form, amount: e.target.value })} 
+              />
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.inputLabel}>Date</label>
+              <input 
+                type="date" 
+                style={styles.input} 
+                value={form.date} 
+                onChange={e => setForm({ ...form, date: e.target.value })} 
+              />
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.inputLabel}>Note (Optional)</label>
+              <input 
+                type="text" 
+                placeholder="E.g. Lunch at Office" 
+                style={styles.input} 
+                value={form.note} 
+                onChange={e => setForm({ ...form, note: e.target.value })} 
+              />
+            </div>
+
+            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '12px', marginTop: '12px' }}>
+              Save Transaction
+            </button>
+          </form>
+        </div>
+
+        <div className="card" style={styles.chartCard}>
+          <h2 style={styles.sectionTitle}>Expense Breakdown</h2>
+          <div style={{ height: 300 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                  formatter={(val) => fmtNPR(val)}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: '24px', padding: '24px' }}>
+        <h2 style={styles.sectionTitle}>Recent Transactions</h2>
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Note</th>
+                <th>Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map(t => (
+                <tr key={t.id}>
+                  <td style={{ fontSize: '13px' }}>{t.date}</td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: t.type === 'INCOME' ? 'var(--profit)' : 'var(--loss)' 
+                      }}></span>
+                      <span style={{ fontWeight: 700 }}>{t.category}</span>
+                    </div>
+                  </td>
+                  <td style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{t.note || '-'}</td>
+                  <td style={{ 
+                    fontFamily: 'var(--mono)', 
+                    fontWeight: 800, 
+                    color: t.type === 'INCOME' ? 'var(--profit)' : 'var(--loss)' 
+                  }}>
+                    {t.type === 'INCOME' ? '+' : '-'}{fmtNPR(t.amount)}
+                  </td>
+                  <td>
+                    <button 
+                      onClick={() => deleteTx(t.id)} 
+                      style={{ background: 'none', border: 'none', color: 'var(--loss)', cursor: 'pointer', fontSize: '18px' }}
+                    >
+                      ×
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {transactions.length === 0 && (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                    No transactions found. Add your first income or expense above.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   )
 }

@@ -20,7 +20,8 @@ export default function Login() {
       await login(email, password)
       navigate('/')
     } catch (err) {
-      setError(err)
+      console.error("Login Error:", err)
+      setError(typeof err === 'string' ? err : (err.message || "Invalid credentials. Please try again."))
     } finally {
       setLoading(false)
     }

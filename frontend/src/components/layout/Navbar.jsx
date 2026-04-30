@@ -1,17 +1,21 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
 import { useNavigate } from 'react-router-dom'
 import AISettingsModal from '../shared/AISettingsModal'
 
 const tabs = [
-  { key: 'portfolio',  label: 'Portfolio'      },
-  { key: 'intelligence',label: 'Intelligence ⚡' },
-  { key: 'hub',         label: 'Trading Hub 🛠️' },
-  { key: 'charts',     label: 'Technical Charts'},
+  { key: 'home',         label: 'Home' },
+  { key: 'portfolio',    label: 'Portfolio'      },
+  { key: 'intelligence', label: 'Analysis' },
+  { key: 'hub',          label: 'Trading Hub' },
+  { key: 'charts',       label: 'Charts'},
+  { key: 'wealth',       label: 'Wealth Advisor'},
 ]
 
 export default function Navbar({ active, onChange }) {
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [showAI, setShowAI] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -54,11 +58,15 @@ export default function Navbar({ active, onChange }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button 
+            onClick={toggleTheme} 
+            style={styles.themeToggle} 
+            title={theme === 'light' ? 'Switch to Dark' : 'Switch to Light'}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
           {user && (
             <div className="desktop-user" style={styles.userSection}>
-              <button onClick={() => setShowAI(true)} style={styles.aiSetupBtn} title="AI Settings">
-                ✨ Setup AI
-              </button>
               <div style={styles.userInfo}>
                 <div style={styles.userName}>{user.name}</div>
                 <div style={styles.userEmail}>{user.email}</div>
@@ -67,12 +75,19 @@ export default function Navbar({ active, onChange }) {
                 <button onClick={handleLogout} style={styles.logoutBtn}>
                   Logout
                 </button>
-                <button 
-                  onClick={() => window.open('/wealth-manager', '_blank')} 
-                  style={styles.wealthBtn}
-                >
-                  💰 Wealth Manager
-                </button>
+                {!import.meta.env.VITE_GEMINI_API_KEY && (
+                  <button onClick={() => setShowAI(true)} style={styles.aiSetupBtnMini} title="AI Settings">
+                    ✨ Setup AI
+                  </button>
+                )}
+                {user.role === 'admin' && (
+                  <button 
+                    onClick={() => navigate('/admin')} 
+                    style={{ ...styles.aiSetupBtnMini, color: '#8b5cf6', borderColor: 'rgba(139, 92, 246, 0.3)' }}
+                  >
+                    🛠️ Admin Panel
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -106,13 +121,15 @@ export default function Navbar({ active, onChange }) {
                   <div style={{ fontWeight: 800, fontSize: 16 }}>{user.name}</div>
                   <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{user.email}</div>
                 </div>
-                <button 
-                  className="btn-primary" 
-                  style={{ width: '100%', marginBottom: 12 }}
-                  onClick={() => { setShowAI(true); setIsMenuOpen(false); }}
-                >
-                  ✨ AI Setup
-                </button>
+                {!import.meta.env.VITE_GEMINI_API_KEY && (
+                  <button 
+                    className="btn-primary" 
+                    style={{ width: '100%', marginBottom: 12 }}
+                    onClick={() => { setShowAI(true); setIsMenuOpen(false); }}
+                  >
+                    ✨ AI Setup
+                  </button>
+                )}
                 <button 
                   className="btn-secondary" 
                   style={{ width: '100%', color: 'var(--loss)', borderColor: 'var(--loss)', marginBottom: 12 }}
@@ -122,11 +139,20 @@ export default function Navbar({ active, onChange }) {
                 </button>
                 <button 
                   className="btn-primary" 
-                  style={{ width: '100%', background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)', border: 'none', padding: '10px', fontSize: '13px' }}
-                  onClick={() => { window.open('/wealth-manager', '_blank'); setIsMenuOpen(false); }}
+                  style={{ width: '100%', background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)', border: 'none', padding: '10px', fontSize: '13px', marginBottom: 12 }}
+                  onClick={() => { navigate('/wealth-manager'); setIsMenuOpen(false); }}
                 >
                   💰 Wealth Manager
                 </button>
+                {user.role === 'admin' && (
+                  <button 
+                    className="btn-primary" 
+                    style={{ width: '100%', background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)', border: 'none', padding: '10px', fontSize: '13px' }}
+                    onClick={() => { navigate('/admin'); setIsMenuOpen(false); }}
+                  >
+                    🛠️ Admin Panel
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -195,26 +221,35 @@ const styles = {
   },
   nav: {
     display: 'flex',
-    gap: 8,
-    background: 'rgba(0,0,0,0.03)',
-    padding: '4px',
+    gap: '4px',
+    background: '#f1f5f9',
+    padding: '6px',
     borderRadius: '12px',
+    border: '1px solid var(--border)',
+    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)',
   },
   tab: {
-    background: 'none',
+    background: 'transparent',
     border: 'none',
     borderRadius: '8px',
-    padding: '8px 16px',
-    fontSize: 14,
-    fontWeight: 600,
+    padding: '12px 28px',
+    fontSize: '14px',
+    fontWeight: '800',
     color: 'var(--text-muted)',
     cursor: 'pointer',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    textTransform: 'none',
+    letterSpacing: '-0.02em',
   },
   tabActive: {
-    color: 'white',
-    background: 'linear-gradient(135deg, var(--primary), var(--accent))',
-    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+    color: 'var(--primary)',
+    background: '#ffffff',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
+    transform: 'translateY(-1px)',
   },
   userSection: {
     display: 'flex',
@@ -237,6 +272,18 @@ const styles = {
     gap: '6px',
     boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
     transition: 'transform 0.2s',
+  },
+  aiSetupBtnMini: {
+    background: 'none',
+    color: '#10b981',
+    border: '1px solid rgba(16, 185, 129, 0.3)',
+    borderRadius: '8px',
+    padding: '6px 12px',
+    fontSize: '10px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    width: '100%',
+    transition: 'all 0.2s',
   },
   userInfo: {
     display: 'flex',
@@ -285,6 +332,19 @@ const styles = {
     boxShadow: '0 2px 6px rgba(251, 191, 36, 0.2)',
     transition: 'transform 0.2s',
     whiteSpace: 'nowrap',
+  },
+  themeToggle: {
+    background: 'var(--bg-main)',
+    border: '1px solid var(--border)',
+    fontSize: '18px',
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
   },
   menuBtn: {
     display: 'none', // Overwritten by CSS in index.css for mobile

@@ -1,8 +1,9 @@
 // Utility to wrap calls to Gemini API via Fetch
 export async function tellGemini(prompt, apiKey) {
-  if (!apiKey) throw new Error('API Key missing. Please setup AI in settings.')
+  const effectiveKey = apiKey || import.meta.env.VITE_GEMINI_API_KEY
+  if (!effectiveKey) throw new Error('AI functionality is currently unavailable.')
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${effectiveKey}`
 
   try {
     const res = await fetch(url, {

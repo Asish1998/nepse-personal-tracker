@@ -1,9 +1,11 @@
 :root {
   /* Executive Terminal UI — High Precision Finance */
-  --bg-main:   #ffffff;       /* Pure professional white */
+  --bg-main:   #f1f5f9;       /* Slate 100 base */
+  --bg-card:   #ffffff;       /* Clean Paper */
   --bg-sidebar:#f8fafc;
-  --bg-card:   #ffffff;
-  --border:    #e2e8f0;       /* Slate 200 — very subtle */
+  --bg-glass:  rgba(255, 255, 255, 0.8);
+  
+  --border:    #e2e8f0;       /* Slate 200 */
   --border-strong: #94a3b8;   /* Slate 400 */
   
   --text-main: #0f172a;       /* Slate 900 */
@@ -21,27 +23,36 @@
   --warn:      var(--warning);
   
   --shadow-flat: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --radius-sm: 4px;           /* Sharper corners for professionalism */
+  --radius-sm: 4px;
   --radius:    6px;
-  
   --sans:      'Inter', system-ui, -apple-system, sans-serif;
   --mono:      'JetBrains Mono', 'Menlo', 'Monaco', monospace;
+}
+
+.dark-theme {
+  --bg-main:   #0a0b10;       /* Deepest Slate */
+  --bg-card:   #151722;       /* Rich Card */
+  --bg-sidebar:#0f111a;
+  --bg-glass:  rgba(21, 23, 34, 0.8);
   
-  font-family: var(--sans);
-  font-size: 13px;            /* Slightly smaller for data density */
-  line-height: 1.5;
-  color: var(--text-main);
-  background: var(--bg-main);
+  --border:    #272c40;       /* Graphite Border */
+  --border-strong: #3b4260;
+  
+  --text-main: #f1f5f9;       /* High Contrast Light */
+  --text-muted:#94a3b8;       /* Muted Slate */
+  
+  --primary:   #f1f5f9;       /* Invert Primary for Dark */
+  --accent:    #3b82f6;       /* Bright Blue */
+  
+  --shadow-flat: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background-color: #f1f5f9; /* Slate 100 — Professional workspace feel */
-  background-image: 
-    linear-gradient(rgba(226, 232, 240, 0.4) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(226, 232, 240, 0.4) 1px, transparent 1px);
-  background-size: 20px 20px; /* Subtle grid */
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
   min-height: 100vh;
 }
 
@@ -54,6 +65,15 @@ body {
   transition: border-color 0.15s ease;
 }
 .card:hover { border-color: var(--border-strong); }
+
+.feature-card:hover { 
+  transform: translateX(4px); 
+  border-color: var(--accent);
+  background: var(--bg-main) !important;
+}
+.feature-card:hover span[style*="featureLabel"] {
+  color: var(--accent) !important;
+}
 
 h1, h2, h3 { 
   color: var(--primary); 
@@ -101,15 +121,16 @@ button:hover { background: #f1f5f9; border-color: var(--border-strong); }
   color: white;
 }
 
-input, select {
-  background: #fff;
+input, select, textarea {
+  background: var(--bg-main);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 6px 12px;
+  padding: 8px 12px;
   font-family: var(--sans);
   font-size: 13px;
   color: var(--text-main);
   outline: none;
+  transition: all 0.2s ease;
 }
 input:focus {
   border-color: var(--accent);
@@ -119,21 +140,21 @@ table { width: 100%; border-collapse: collapse; margin-top: 10px; }
 th {
   text-align: left;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted);
-  padding: 10px 16px;
-  border-bottom: 2px solid var(--bg-main);
-  background: #f8fafc;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--border);
+  background: var(--bg-sidebar);
 }
 td {
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   color: var(--text-main);
   font-size: 13px;
 }
-tr:hover td { background: #f8fafc; }
+tr:hover td { background: var(--bg-sidebar); }
 
 /* Financial terminal specific */
 .profit { color: var(--profit); font-weight: 700; }

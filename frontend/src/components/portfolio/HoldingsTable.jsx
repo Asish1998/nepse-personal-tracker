@@ -38,11 +38,15 @@ export default function HoldingsTable() {
   // Phase 1: Pre-calculate all financial fields safely so we can sort by them
   const processedHoldings = state.holdings.map(h => {
     const investment = h.isImported ? (h.inv || (h.qty * h.buy)) : effectiveBuyCost(h.qty, h.buy).totalCost
-    const mktValue = h.isImported ? (h.mkt || (h.qty * h.cur)) : (h.qty * h.cur)
-    const pl = h.isImported ? (h.pl || (mktValue - investment)) : (mktValue - investment)
+    const mktValue = h.qty * h.cur
+    const pl = mktValue - investment
+    
+    // Day's gain must use (Current - Previous)
+    // If we don't have Previous, it will show 0
     const prev = h.prev || h.cur
     const changeVal = h.cur - prev
     const dailyPL = changeVal * h.qty
+    
     return { ...h, investment, mktValue, pl, changeVal, dailyPL }
   })
 

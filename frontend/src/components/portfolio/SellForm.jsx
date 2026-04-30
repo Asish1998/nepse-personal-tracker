@@ -14,11 +14,11 @@ export default function SellForm({ holding, onClose }) {
     const q = parseFloat(qty)
     const p = parseFloat(price)
     if (q > 0 && p > 0) {
-      // Calculate gross profit for CGT
-      const { totalCost: buyBasis } = effectiveBuyCost(q, holding.buy)
+      // Calculate gross profit based on the accurate persisted WACC basis
+      const unitBasis = (holding.inv || (holding.qty * holding.buy)) / holding.qty
+      const buyBasis = unitBasis * q
+      
       const grossAmount = q * p
-      // For CGT, NEPSE uses (Sell Price - Buy Price) - fees heuristic
-      // but actually it is (Sell Price * Qty) - (Buy Price * Qty) - Buy Fees
       const days = holdingDays(holding.date, date)
       const fees = calcFees(grossAmount, 'SELL', days, grossAmount - buyBasis)
       setPreview({ fees, days, buyBasis })

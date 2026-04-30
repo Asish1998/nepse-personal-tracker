@@ -6,36 +6,31 @@ export default function SummaryCards() {
   const { state } = useApp()
 
   // Unrealized (Current Holdings)
+  // Unrealized (Current Holdings)
   const unrealized = state.holdings.reduce(
     (acc, h) => {
-      // If imported, use the pre-calculated investment from Excel
-      // If manual, calculate using the fee engine
-      const { totalCost, fees } = h.isImported 
-        ? { totalCost: h.inv || (h.qty * h.buy), fees: null } 
-        : effectiveBuyCost(h.qty, h.buy)
-      
+      // Use the persisted total cost basis (inv) which now strictly includes buy fees
+      const totalCost = h.inv || (h.qty * h.buy)
       const curValue = h.qty * h.cur
+      
       acc.invested += totalCost
       acc.value    += curValue
-      acc.fees     += (fees ? fees.commission + fees.sebonFee : 0)
       return acc
     },
-    { invested: 0, value: 0, fees: 0 }
+    { invested: 0, value: 0 }
   )
 
   // Realized (Sold Trades)
   const realized = state.trades.reduce(
     (acc, t) => {
       if (t.type === 'SELL') {
-        // Profit = Net Received - (Buy Basis + Buy Fees)
-        // Note: buyPrice in t is the original cost/sh
-        const { totalCost: originalCostBasis } = effectiveBuyCost(t.qty, t.buyPrice)
-        const profit = t.net - originalCostBasis
+        // Realized Profit = Net Inflow (after fees) - Original WACC Basis Outflow
+        // We now store 'basisTotal' in the trade record for perfect tracking
+        const originalBasis = t.basisTotal || (t.qty * (t.buyPrice || 0))
+        const profit = t.net - originalBasis
         acc.profit += profit
         acc.fees   += t.fees
       } else if (t.type === 'BUY') {
-        // Track fees paid on buys separately if they are already in state.trades
-        // (existing logic doesn't add buys to trades unless imported, so this is safe)
         acc.buyFees += (t.fees || 0)
       }
       return acc
@@ -75,10 +70,10 @@ export default function SummaryCards() {
 
   const cards = [
     { label: 'Networth',        value: `NPR ${fmtNPR(netWorth)}`, bold: true, color: 'var(--primary)' },
+    { label: 'Total Investment', value: `NPR ${fmtNPR(unrealized.invested)}`, color: 'var(--text-main)', sub: 'Cost Basis' },
     { label: 'Realizable Value', value: `NPR ${fmtNPR(realizable)}`, color: 'var(--accent)', sub: 'After Potential CGT' },
     { label: 'Overall Gain',    value: `${totalPL >= 0 ? '+' : ''}NPR ${fmtNPR(totalPL)}`, color: totalPL >= 0 ? 'var(--profit)' : 'var(--loss)' },
     { label: 'Days Gain',       value: `NPR ${fmtNPR(daysGain)}`, color: daysGain >= 0 ? 'var(--profit)' : 'var(--loss)' },
-    { label: 'Potential CGT',   value: `NPR ${fmtNPR(potentialTax)}`, color: 'var(--loss)', sub: 'Unrealized Tax' },
     { label: 'Total Net P/L',   value: `${realNetPL >= 0 ? '+' : ''}NPR ${fmtNPR(realNetPL)}`, color: realNetPL >= 0 ? 'var(--profit)' : 'var(--loss)', bold: true },
   ]
 

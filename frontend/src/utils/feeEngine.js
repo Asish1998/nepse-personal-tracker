@@ -8,12 +8,36 @@ const DP_CHARGE    = 25;       // NPR 25 flat — sell only
 const CGT_SHORT    = 0.075;    // < 365 days
 const CGT_LONG     = 0.05;     // ≥ 365 days
 
+const SLABS = [
+  { limit: 50_000, rate: 0.0036 },
+  { limit: 500_000, rate: 0.0033 },
+  { limit: 2_000_000, rate: 0.0031 },
+  { limit: 10_000_000, rate: 0.0027 },
+  { limit: Infinity, rate: 0.0024 }
+];
+
 export function getCommissionInfo(amount) {
-  if (amount <= 50_000)    return { rate: 0.0036, label: '0.36% (≤ 50K)' };
-  if (amount <= 500_000)   return { rate: 0.0033, label: '0.33% (50K - 5L)' };
-  if (amount <= 2_000_000) return { rate: 0.0031, label: '0.31% (5L - 20L)' };
-  if (amount <= 10_000_000)return { rate: 0.0027, label: '0.27% (20L - 1Cr)' };
-  return { rate: 0.0024, label: '0.24% (> 1Cr)' };
+  let commission = 0;
+  let remaining = amount;
+  let lastLimit = 0;
+
+  for (const slab of SLABS) {
+    if (remaining <= 0) break;
+    const slabSize = slab.limit - lastLimit;
+    const applicable = Math.min(remaining, slabSize);
+    commission += applicable * slab.rate;
+    remaining -= applicable;
+    lastLimit = slab.limit;
+  }
+
+  // NEPSE usually has a minimum commission of Rs 10
+  commission = Math.max(10, commission);
+  
+  return { 
+    commission, 
+    effectiveRate: (commission / amount),
+    label: (commission / amount * 100).toFixed(3) + '%'
+  };
 }
 
 /**
@@ -26,12 +50,14 @@ export function getCommissionInfo(amount) {
  * @returns {object} full fee breakdown
  */
 export function calcFees(grossAmount, type, holdingDays = 0, grossProfit = 0) {
-  if (!grossAmount || grossAmount <= 0) return null;
+  if (!grossAmount || grossAmount <= 0) return { totalFees: 0, netAmount: 0, commission: 0, sebonFee: 0, dpCharge: 0, cgt: 0 };
 
-  const { rate, label: tier } = getCommissionInfo(grossAmount);
-  const commission = grossAmount * rate;
+  const { commission, label: tier } = getCommissionInfo(grossAmount);
   const sebonFee   = grossAmount * SEBON_RATE;
-  const dpCharge   = type === 'SELL' ? DP_CHARGE : 0;
+  
+  // As per Merolagani/NEPSE rules: DP charge is Rs 25 for SELL. 
+  // For BUY it's also often charged to the client.
+  const dpCharge   = DP_CHARGE; 
 
   let cgt = 0;
   let cgtRate = 0;
@@ -42,15 +68,14 @@ export function calcFees(grossAmount, type, holdingDays = 0, grossProfit = 0) {
 
   const totalFees = commission + sebonFee + dpCharge + cgt;
 
-  // BUY  → you pay gross + fees (total outflow)
-  // SELL → you receive gross - fees (net inflow)
+  // BUY  → you pay gross + commission + sebon + dp (total outflow)
+  // SELL → you receive gross - commission - sebon - dp - cgt (net inflow)
   const netAmount = type === 'BUY'
-    ? grossAmount + commission + sebonFee
+    ? grossAmount + commission + sebonFee + dpCharge
     : grossAmount - commission - sebonFee - dpCharge - cgt;
 
   return {
     grossAmount,
-    rate,
     tier,
     commission,
     sebonFee,
