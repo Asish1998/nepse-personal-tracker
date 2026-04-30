@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { fmtNPR } from '../../utils/formatters'
+import MarketLeadersGrid from './MarketLeadersGrid'
 
 export default function MarketIntelligence({ onNavigate }) {
   const { state } = useApp()
@@ -32,21 +33,10 @@ export default function MarketIntelligence({ onNavigate }) {
     return () => clearInterval(timer)
   }, [])
 
-  // Real data derivation where possible
-  const portfolioSummary = useMemo(() => {
-    const totalValue = state.holdings.reduce((acc, h) => acc + (h.qty * (h.cur || h.buy)), 0)
-    const totalGain = state.holdings.reduce((acc, h) => acc + ((h.cur - h.buy) * h.qty || 0), 0)
-    const gainPercent = totalValue > 0 ? (totalGain / (totalValue - totalGain)) * 100 : 0
-    return { totalValue, totalGain, gainPercent }
-  }, [state.holdings])
-
   // Enhanced Market Simulation
   const marketData = useMemo(() => {
     const indexBase = 2744.45
     const drift = (Math.sin(Date.now() / 15000) * 12) + (Math.random() * 3)
-    
-    // Pick 5 random stocks from the dynamic list
-    const picks = [...symbols].sort(() => 0.5 - Math.random()).slice(0, 5)
     
     return {
       index: indexBase + drift,
@@ -58,12 +48,6 @@ export default function MarketIntelligence({ onNavigate }) {
         unchanged: 12,
         decline: 268 - (drift > 0 ? 15 : -8),
       },
-      hotStocks: picks.map(s => ({
-        sym: s.symbol,
-        ltp: s.ltp + (Math.random() * 5 - 2.5),
-        change: (Math.random() * 20 - 10).toFixed(1),
-        percent: (Math.random() * 4 - 2).toFixed(2)
-      })),
       alerts: symbols.length > 2 ? [
         { type: 'BUY', sym: symbols[0]?.symbol, price: symbols[0]?.ltp, time: 'NOW', signal: 'Momentum Breakout' },
         { type: 'SELL', sym: symbols[1]?.symbol, price: symbols[1]?.ltp, time: 'LATEST', signal: 'Overbought (RSI)' }
@@ -122,47 +106,30 @@ export default function MarketIntelligence({ onNavigate }) {
           </div>
         </div>
 
-        {/* Live Signals & Hot Stocks */}
-        <div style={styles.rightCol}>
-          <div className="card" style={styles.sectionCard}>
-            <div style={styles.cardHeader}>
-              <span style={styles.cardTitle}>NEURAL ALPHA SIGNALS</span>
-              <div style={styles.liveBadge}><span style={styles.pulseDot} /> LIVE</div>
-            </div>
-            <div style={styles.signalsList}>
-               {marketData.alerts.map((a, i) => (
-                 <div key={i} style={styles.signalRow}>
-                    <div style={{ ...styles.signalType, background: a.type === 'BUY' ? 'hsla(142, 71%, 45%, 0.1)' : 'hsla(0, 84%, 60%, 0.1)', color: a.type === 'BUY' ? 'var(--profit)' : 'var(--loss)' }}>{a.type}</div>
-                    <div style={styles.signalInfo}>
-                      <div style={styles.signalSym}>{a.sym}</div>
-                      <div style={styles.signalPrice}>{fmtNPR(a.price)}</div>
-                    </div>
-                    <div style={styles.signalReason}>{a.signal}</div>
-                    <div style={styles.signalTime}>{a.time}</div>
-                 </div>
-               ))}
-               {!marketData.alerts.length && <div style={styles.emptySignals}>Scanning for high-probability setups...</div>}
-            </div>
+        {/* Live Signals Card */}
+        <div className="card" style={styles.sectionCard}>
+          <div style={styles.cardHeader}>
+            <span style={styles.cardTitle}>NEURAL ALPHA SIGNALS</span>
+            <div style={styles.liveBadge}><span style={styles.pulseDot} /> LIVE</div>
           </div>
-
-          <div className="card" style={styles.sectionCard}>
-            <div style={styles.cardHeader}>
-              <span style={styles.cardTitle}>TOP GAINERS & VOLUME</span>
-            </div>
-            <div style={styles.hotList}>
-              {marketData.hotStocks.map((s, i) => (
-                <div key={i} style={styles.hotRow}>
-                  <div style={styles.hotSym}>{s.sym}</div>
-                  <div style={styles.hotPrice}>{fmtNPR(s.ltp)}</div>
-                  <div style={{ ...styles.hotChange, color: s.change >= 0 ? 'var(--profit)' : 'var(--loss)' }}>
-                    {s.change > 0 ? '+' : ''}{s.change} ({s.percent}%)
+          <div style={styles.signalsList}>
+             {marketData.alerts.map((a, i) => (
+               <div key={i} style={styles.signalRow}>
+                  <div style={{ ...styles.signalType, background: a.type === 'BUY' ? 'hsla(142, 71%, 45%, 0.1)' : 'hsla(0, 84%, 60%, 0.1)', color: a.type === 'BUY' ? 'var(--profit)' : 'var(--loss)' }}>{a.type}</div>
+                  <div style={styles.signalInfo}>
+                    <div style={styles.signalSym}>{a.sym}</div>
+                    <div style={styles.signalPrice}>{fmtNPR(a.price)}</div>
                   </div>
-                </div>
-              ))}
-            </div>
+                  <div style={styles.signalReason}>{a.signal}</div>
+                  <div style={styles.signalTime}>{a.time}</div>
+               </div>
+             ))}
+             {!marketData.alerts.length && <div style={styles.emptySignals}>Scanning for high-probability setups...</div>}
           </div>
         </div>
       </div>
+
+      <MarketLeadersGrid />
     </div>
   )
 }
@@ -188,7 +155,6 @@ const styles = {
   pulseTitle: { fontSize: '14px', fontWeight: '800', color: 'var(--text-main)', marginBottom: '16px' },
   shortcutGrid: { display: 'flex', gap: '12px' },
   shortcut: { flex: 1, padding: '12px', borderRadius: '10px', fontSize: '12px' },
-  rightCol: { display: 'flex', flexDirection: 'column', gap: '32px' },
   sectionCard: { padding: '24px' },
   cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' },
   cardTitle: { fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', letterSpacing: '0.08em' },
@@ -202,11 +168,5 @@ const styles = {
   signalPrice: { fontSize: '11px', color: 'var(--text-dim)', fontWeight: '700' },
   signalReason: { flex: 1, fontSize: '13px', fontWeight: '600', color: 'var(--text-main)' },
   signalTime: { fontSize: '10px', color: 'var(--text-dim)', fontWeight: '600' },
-  hotList: { display: 'flex', flexDirection: 'column', gap: '8px' },
-  hotRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', borderBottom: '1px solid var(--border)' },
-  hotSym: { fontWeight: '900', width: '80px', color: 'var(--text-main)' },
-  hotPrice: { fontWeight: '800', fontSize: '14px', color: 'var(--text-main)' },
-  hotChange: { fontWeight: '800', fontSize: '14px', textAlign: 'right' },
   emptySignals: { padding: '24px', textAlign: 'center', fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }
 }
-
