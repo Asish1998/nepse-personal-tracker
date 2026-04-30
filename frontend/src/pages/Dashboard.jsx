@@ -1,17 +1,12 @@
 import { useState } from 'react'
-import { AppProvider } from '../context/AppContext'
 import Navbar    from '../components/layout/Navbar'
 import Layout    from '../components/layout/Layout'
 import Portfolio from '../components/portfolio/Portfolio'
-import AlertsManager from '../components/alerts/AlertsManager'
-import JournalManager from '../components/journal/JournalManager'
-import WatchlistManager from '../components/watchlist/WatchlistManager'
-import TechnicalChart from '../components/charts/TechnicalChart'
-import IntelligenceDashboard from '../components/intelligence/IntelligenceDashboard'
 import ManagerHub from '../components/layout/ManagerHub'
 import TickerTape from '../components/layout/TickerTape'
 import WealthManager from './WealthManager'
-
+import TechnicalChart from '../components/charts/TechnicalChart'
+import IntelligenceDashboard from '../components/intelligence/IntelligenceDashboard'
 import MarketIntelligence from '../components/intelligence/MarketIntelligence'
 
 // keep other stubs for now

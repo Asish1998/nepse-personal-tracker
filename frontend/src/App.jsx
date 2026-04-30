@@ -10,8 +10,6 @@ import StockDetails from './pages/StockDetails'
 import WealthManager from './pages/WealthManager'
 import AdminDashboard from './pages/AdminDashboard'
 
-import SecurityGateway from './components/auth/SecurityGateway'
-
 function ProtectedLayout() {
   const { user } = useAuth()
   

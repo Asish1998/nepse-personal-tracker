@@ -12,9 +12,29 @@ const features = [
 export default function MarketIntelligence({ onNavigate }) {
   const { state } = useApp()
   const [tick, setTick] = useState(0)
+  const [symbols, setSymbols] = useState([])
 
   useEffect(() => {
-    const timer = setInterval(() => setTick(t => t + 1), 2000)
+    // 1. Driving animation tick
+    const timer = setInterval(() => setTick(t => t + 1), 2500)
+    
+    // 2. Fetch dynamic symbols
+    fetch('http://localhost:3001/symbols')
+      .then(res => res.json())
+      .then(setSymbols)
+      .catch(() => {
+        // Fallback to core NEPSE leaders if service is down
+        setSymbols([
+          { symbol: 'NICA', ltp: 890, name: 'NIC Asia Bank' },
+          { symbol: 'SHL', ltp: 450, name: 'Soaltee Hotel' },
+          { symbol: 'HDL', ltp: 2150, name: 'Himalayan Distillery' },
+          { symbol: 'NTC', ltp: 920, name: 'Nepal Telecom' },
+          { symbol: 'UPPER', ltp: 410, name: 'Upper Tamakoshi' },
+          { symbol: 'HIDCL', ltp: 210, name: 'HIDCL' },
+          { symbol: 'AKPL', ltp: 310, name: 'Arun Valley' }
+        ])
+      })
+
     return () => clearInterval(timer)
   }, [])
 
@@ -29,30 +49,33 @@ export default function MarketIntelligence({ onNavigate }) {
   // Enhanced Market Simulation
   const marketData = useMemo(() => {
     const indexBase = 2744.45
-    const drift = (Math.sin(Date.now() / 10000) * 10) + (Math.random() * 2)
+    const drift = (Math.sin(Date.now() / 15000) * 12) + (Math.random() * 3)
+    
+    // Pick 5 random stocks from the dynamic list
+    const picks = [...symbols].sort(() => 0.5 - Math.random()).slice(0, 5)
+    
     return {
       index: indexBase + drift,
       change: -25.81 + drift,
       percentChange: -0.93 + (drift / indexBase * 100),
-      status: (drift > 0) ? 'RECOVERY' : 'DECLINE',
+      status: (drift > 0) ? 'RECUPERATING' : 'CONSOLIDATING',
       stats: {
-        advance: 59 + (drift > 0 ? 10 : -5),
-        unchanged: 11,
-        decline: 269 - (drift > 0 ? 10 : -5),
+        advance: 59 + (drift > 0 ? 15 : -8),
+        unchanged: 12,
+        decline: 268 - (drift > 0 ? 15 : -8),
       },
-      hotStocks: [
-        { sym: 'NICA', ltp: 890 + (drift/10), change: 12.5, percent: 1.42 },
-        { sym: 'SHL', ltp: 450 + (drift/5), change: 40.9, percent: 9.98 },
-        { sym: 'HDL', ltp: 2150 - drift, change: -15, percent: -0.69 },
-        { sym: 'HIDCL', ltp: 210 + (drift/20), change: 5, percent: 2.44 },
-        { sym: 'AKJCL', ltp: 180 + (drift/30), change: 2, percent: 1.12 }
-      ],
-      alerts: [
-        { type: 'BUY', sym: 'NTC', price: 920, time: '10:15 AM', signal: 'RSI Bullish Crossover' },
-        { type: 'SELL', sym: 'UPPER', price: 410, time: '11:30 AM', signal: 'MACD Bearish Crossover' }
-      ]
+      hotStocks: picks.map(s => ({
+        sym: s.symbol,
+        ltp: s.ltp + (Math.random() * 5 - 2.5),
+        change: (Math.random() * 20 - 10).toFixed(1),
+        percent: (Math.random() * 4 - 2).toFixed(2)
+      })),
+      alerts: symbols.length > 2 ? [
+        { type: 'BUY', sym: symbols[0]?.symbol, price: symbols[0]?.ltp, time: 'NOW', signal: 'Momentum Breakout' },
+        { type: 'SELL', sym: symbols[1]?.symbol, price: symbols[1]?.ltp, time: 'LATEST', signal: 'Overbought (RSI)' }
+      ] : []
     }
-  }, [tick])
+  }, [tick, symbols])
 
   const isUp = marketData.change >= 0
 
