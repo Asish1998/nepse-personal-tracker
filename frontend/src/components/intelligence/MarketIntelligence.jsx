@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext'
 import { fmtNPR } from '../../utils/formatters'
 import SectorHeatmap from './SectorHeatmap'
 import BrokerActivity from './BrokerActivity'
+import MarketLeadersGrid from './MarketLeadersGrid'
 
 export default function MarketIntelligence({ onNavigate }) {
   const { state } = useApp()
