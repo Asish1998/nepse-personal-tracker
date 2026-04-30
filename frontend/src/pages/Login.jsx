@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../utils/supabase'
 import '../styles/Auth.css'
+
 
 
 export default function Login() {
@@ -40,13 +40,9 @@ export default function Login() {
         
         <div className="auth-header">
            <h1 className="auth-title login">Welcome Back</h1>
-           {!supabase && (
-             <div style={{ background: 'rgba(251, 191, 36, 0.1)', color: '#d97706', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '800', marginBottom: '16px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
-               ⚠️ Running in Local Storage Mode
-             </div>
-           )}
            <p className="auth-subtitle">Enter your details to access your portfolio</p>
          </div>
+
 
         {error && (
           <div className="auth-error">
