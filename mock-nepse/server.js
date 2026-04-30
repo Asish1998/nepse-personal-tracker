@@ -111,20 +111,22 @@ async function getMarketData(force = false) {
     const $ = cheerio.load(html)
     const out = []
 
-    // Merolagani Latest Market table structure:
-    // <tr><td><a ...>SYMBOL</a></td><td>LTP</td>...</tr>
+    // Merolagani Latest Market table structure (discovered via browser probe):
+    // ID: #ctl00_ContentPlaceHolder1_LiveTrading
+    // Columns: [0]Sym, [1]LTP, [2]%Chg, [3]Open, [4]High, [5]Low, [6]Qty, [7]PClose, [8]Diff
     const seen = new Set()
-    $('table tr').each((i, tr) => {
+    $('#ctl00_ContentPlaceHolder1_LiveTrading table tr').each((i, tr) => {
       const cols = $(tr).find('td')
-      if (cols.length >= 2) {
-        const symbol = $(cols[0]).find('a').text().trim().toUpperCase()
-        const name = $(cols[0]).find('a').attr('title') || null
-        const ltpStr = $(cols[1]).text().trim().replace(/,/g, '')
-        const ltp = parseFloat(ltpStr)
+      if (cols.length >= 9) {
+        const symbol = $(cols[0]).text().trim().toUpperCase()
+        const name   = $(cols[0]).find('a').attr('title') || null
+        const ltp    = parseFloat($(cols[1]).text().replace(/,/g, ''))
+        const pct    = parseFloat($(cols[2]).text().replace(/,/g, ''))
+        const change = parseFloat($(cols[8]).text().replace(/,/g, ''))
         
         if (symbol && !isNaN(ltp) && !seen.has(symbol)) {
           seen.add(symbol)
-          out.push({ symbol, name, ltp })
+          out.push({ symbol, name, ltp, pct, change })
         }
       }
     })
@@ -146,18 +148,33 @@ app.get('/symbols', async (req, res) => {
   res.json(data)
 })
 
-app.get('/price', async (req, res) => {
-  const symbol = (req.query.symbol || '').toUpperCase()
-  if (!symbol) return res.status(400).json({ error: 'Symbol required' })
-
+app.get('/market/leaders', async (req, res) => {
   const data = await getMarketData()
-  const found = data.find(d => d.symbol === symbol)
-  
-  if (found) {
-    res.json({ price: found.ltp })
-  } else {
-    res.status(404).json({ error: 'Symbol not found' })
-  }
+  if (!data || data.length === 0) return res.json({ gainers: [], losers: [], active: [] })
+
+  const sorted = [...data].sort((a, b) => (b.pct || 0) - (a.pct || 0))
+  const gainers = sorted.slice(0, 10).map(s => ({
+    sym: s.symbol,
+    ltp: s.ltp,
+    pt: s.change || (s.ltp * (s.pct/100)),
+    pct: s.pct
+  }))
+  const losers = [...sorted].reverse().slice(0, 10).map(s => ({
+    sym: s.symbol,
+    ltp: s.ltp,
+    pt: s.change || (s.ltp * (s.pct/100)),
+    pct: s.pct
+  }))
+
+  // Simulation for Turnover/Demand until we have a better scraper for those specific tables
+  const active = sorted.slice(5, 15).map(s => ({
+    sym: s.symbol,
+    val: Math.floor(Math.random() * 500000).toLocaleString(),
+    ltp: s.ltp,
+    orders: Math.floor(Math.random() * 1000)
+  }))
+
+  res.json({ gainers, losers, active })
 })
 
 app.get('/history', async (req, res) => {
