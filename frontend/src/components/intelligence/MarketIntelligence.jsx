@@ -1,3 +1,7 @@
+import { useMemo } from 'react'
+import { useApp } from '../../context/AppContext'
+import { fmtNPR } from '../../utils/formatters'
+
 const features = [
   { icon: '💼', title: 'Quantum Tracking', desc: 'Real-time WACC, P/L and holdings analysis.', key: 'portfolio' },
   { icon: '⚡', title: 'AI Intelligence', desc: 'Neural forecasting and risk assessment.', key: 'intelligence' },
