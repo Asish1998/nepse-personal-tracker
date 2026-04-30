@@ -16,6 +16,10 @@ export default function AdminDashboard() {
 
   const fetchUsers = async () => {
     setLoading(true)
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -33,6 +37,7 @@ export default function AdminDashboard() {
   }
 
   const handleStatusUpdate = async (userId, newStatus) => {
+    if (!supabase) return
     const { error } = await supabase
       .from('profiles')
       .update({ status: newStatus })

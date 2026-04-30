@@ -21,6 +21,8 @@ export function AuthProvider({ children }) {
     setUser(base);
 
     // Then load profile in background (non-blocking)
+    if (!supabase) return;
+    
     supabase
       .from('profiles')
       .select('name, status, role')
@@ -39,6 +41,11 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // 1. Check existing session
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user) {
         loadProfile(data.session.user);
@@ -47,29 +54,35 @@ export function AuthProvider({ children }) {
     }).catch(() => setLoading(false));
 
     // 2. Listen for login/logout — NOT async, never blocks
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        loadProfile(session.user);
-      } else {
-        setUser(null);
-      }
-    });
+    let subscription = null;
+    if (supabase) {
+      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          loadProfile(session.user);
+        } else {
+          setUser(null);
+        }
+      });
+      subscription = sub;
+    }
 
     // 3. Emergency timeout
     const timeout = setTimeout(() => setLoading(false), 4000);
 
     return () => {
-      listener.subscription.unsubscribe();
+      if (subscription) subscription.unsubscribe();
       clearTimeout(timeout);
     };
   }, []);
 
   const login = async (email, password) => {
+    if (!supabase) throw 'Supabase not initialized';
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error.message;
   };
 
   const register = async (name, email, password) => {
+    if (!supabase) throw 'Supabase not initialized';
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -90,7 +103,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    if (supabase) await supabase.auth.signOut();
     setUser(null);
   };
 

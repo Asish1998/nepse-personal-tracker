@@ -120,6 +120,11 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (user && user.id && !initialFetchRef.current) {
       const loadUserContent = async () => {
+        if (!supabase) {
+          initialFetchRef.current = true;
+          return;
+        }
+
         const { data, error } = await supabase
           .from('user_data')
           .select('content')
@@ -140,6 +145,7 @@ export function AppProvider({ children }) {
     if (!user || !initialFetchRef.current) return
 
     const saveData = async () => {
+      if (!supabase) return;
       // Save structural state (holdings, trades, etc.)
       await supabase
         .from('user_data')
