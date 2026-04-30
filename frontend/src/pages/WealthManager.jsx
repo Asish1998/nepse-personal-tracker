@@ -90,11 +90,13 @@ export default function WealthManager() {
 
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.title}>Wealth Manager & Expense Tracker</h1>
-        <p style={styles.subtitle}>Localized financial management for your everyday life in Nepal.</p>
-      </div>
+    <div style={{ background: 'var(--bg-main)', minHeight: '100vh' }}>
+      <Navbar active="wealth" onChange={() => {}} />
+      <div style={{ ...styles.container, padding: '40px 32px', maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={styles.header}>
+          <h1 style={styles.title}>Wealth Command Center</h1>
+          <p style={styles.subtitle}>Localized financial management & asset tracking for Nepal.</p>
+        </div>
 
       <div style={styles.statsGrid}>
         <div className="card" style={styles.statCard}>
@@ -285,6 +287,7 @@ export default function WealthManager() {
               )}
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </div>

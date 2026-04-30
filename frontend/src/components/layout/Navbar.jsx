@@ -28,7 +28,11 @@ export default function Navbar({ active, onChange }) {
   }
 
   const handleTabChange = (key) => {
-    onChange(key)
+    if (window.location.pathname !== '/') {
+      navigate('/', { state: { activeTab: key } })
+    } else {
+      onChange(key)
+    }
     setIsMenuOpen(false)
   }
 

@@ -27,9 +27,12 @@ const sections = {
   wealth: WealthManager
 }
 
+import { useLocation } from 'react-router-dom'
+
 export default function Dashboard() {
   const { user, logout } = useAuth()
-  const [active, setActive] = useState('home')
+  const location = useLocation()
+  const [active, setActive] = useState(location.state?.activeTab || 'home')
   
   // Show brief loader while profile status is being fetched
   if (user?.status === 'loading') {

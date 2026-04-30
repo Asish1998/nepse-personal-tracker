@@ -38,12 +38,16 @@ export default function AdminDashboard() {
 
   const handleStatusUpdate = async (userId, newStatus) => {
     if (!supabase) return
-    const { error } = await supabase
+    setLoading(true)
+    
+    // Using .select() to confirm the database actually updated the row
+    const { data, error } = await supabase
       .from('profiles')
       .update({ status: newStatus })
       .eq('id', userId)
+      .select()
 
-    if (!error) {
+    if (!error && data && data.length > 0) {
       setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus } : u))
       // Update stats
       const nextUsers = users.map(u => u.id === userId ? { ...u, status: newStatus } : u)
@@ -53,8 +57,10 @@ export default function AdminDashboard() {
         approved: nextUsers.filter(u => u.status === 'approved').length
       })
     } else {
-      alert('Failed to update status: ' + error.message)
+      const msg = error ? error.message : 'No rows were updated. Check your Supabase RLS policies.'
+      alert('Update Failed: ' + msg)
     }
+    setLoading(false)
   }
 
   if (user?.role !== 'admin') {
