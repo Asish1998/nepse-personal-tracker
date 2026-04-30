@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../utils/supabase'
 import '../styles/Auth.css'
+
 
 export default function Register() {
   const [name, setName] = useState('')
@@ -44,9 +46,14 @@ export default function Register() {
       <div className="auth-card">
         
         <div className="auth-header">
-          <h1 className="auth-title register">Create Account</h1>
-          <p className="auth-subtitle">Join to start tracking your NEPSE portfolio</p>
-        </div>
+           <h1 className="auth-title register">Create Account</h1>
+           {!supabase && (
+             <div style={{ background: 'rgba(251, 191, 36, 0.1)', color: '#d97706', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '800', marginBottom: '16px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+               ⚠️ Running in Local Storage Mode
+             </div>
+           )}
+           <p className="auth-subtitle">Join to start tracking your NEPSE portfolio with local session</p>
+         </div>
 
         {error && (
           <div className="auth-error">

@@ -64,6 +64,12 @@ export function AuthProvider({ children }) {
         }
       });
       subscription = sub;
+    } else {
+      // Local Mode: Look for local user
+      const localUser = localStorage.getItem('auth_user_local');
+      if (localUser) {
+        setUser(JSON.parse(localUser));
+      }
     }
 
     // 3. Emergency timeout
@@ -76,13 +82,37 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    if (!supabase) throw 'Supabase not initialized';
+    if (!supabase) {
+      // Local Auth Fallback
+      const localUsers = JSON.parse(localStorage.getItem('auth_users_all') || '[]');
+      const match = localUsers.find(u => u.email === email && u.password === password);
+      if (match) {
+        const userObj = { id: match.id, email: match.email, name: match.name, status: 'approved' };
+        setUser(userObj);
+        localStorage.setItem('auth_user_local', JSON.stringify(userObj));
+        return;
+      }
+      throw 'Invalid credentials in Local Mode.';
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error.message;
   };
 
+
   const register = async (name, email, password) => {
-    if (!supabase) throw 'Supabase not initialized';
+    if (!supabase) {
+      // Local Auth Fallback
+      const localUsers = JSON.parse(localStorage.getItem('auth_users_all') || '[]');
+      if (localUsers.find(u => u.email === email)) throw 'Email already registered.';
+      
+      const newUser = { id: 'local_' + Date.now(), name, email, password };
+      localStorage.setItem('auth_users_all', JSON.stringify([...localUsers, newUser]));
+      
+      const userObj = { id: newUser.id, email, name, status: 'approved' };
+      setUser(userObj);
+      localStorage.setItem('auth_user_local', JSON.stringify(userObj));
+      return;
+    }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -102,10 +132,13 @@ export function AuthProvider({ children }) {
     if (profileErr) console.warn('Profile insert note:', profileErr.message);
   };
 
+
   const logout = async () => {
     if (supabase) await supabase.auth.signOut();
+    localStorage.removeItem('auth_user_local');
     setUser(null);
   };
+
 
   if (loading) {
     return (
