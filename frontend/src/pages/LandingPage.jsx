@@ -118,28 +118,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* COMPARISON TABLE */}
-        <section style={styles.comparisonSec}>
-          <div style={styles.sectionHeader} className="fade-up">
-            <h2 style={styles.sectionTitle}>Stop Trading in the Dark</h2>
-            <p style={styles.sectionSub}>The difference between retail guessing and institutional execution.</p>
-          </div>
-
-          <div className="glass" style={styles.comparisonTable}>
-            <div style={styles.compHeader}>
-              <div style={styles.compCol}>Decision Matrix</div>
-              <div style={styles.compCol}>Normal Investor</div>
-              <div style={{ ...styles.compCol, color: '#00f2ff' }}>Astrix Alpha User</div>
-            </div>
-            
-            <ComparisonRow label="Trade Rationale" normal="Guessing & Rumors" alpha="Data-Driven AI Intelligence" />
-            <ComparisonRow label="Analysis Speed" normal="Manual Spreadsheet Work" alpha="AI-Powered Instant Analysis" />
-            <ComparisonRow label="Psycology" normal="Emotional & Panic Moves" alpha="Confidence-Backed Execution" />
-            <ComparisonRow label="Market Timing" normal="Late Entries / FOMO" alpha="Early Machine-Signal Alerts" />
-            <ComparisonRow label="Taxation/Fees" normal="Manual & Error-Prone" alpha="Automated WACC & CGT Auditing" />
-          </div>
-        </section>
-
         <section style={styles.finalCta}>
           <h2 style={styles.finalTitle}>Start Investing Intelligently.</h2>
           <button style={styles.mainCtaLarge} onClick={() => navigate('/register')}>Launch Your Free Terminal</button>
@@ -167,15 +145,6 @@ function FeatureCard({ icon, title, desc, gradient }) {
   );
 }
 
-function ComparisonRow({ label, normal, alpha }) {
-  return (
-    <div className="comparison-row" style={styles.compRow}>
-      <div style={styles.compColLabel}>{label}</div>
-      <div style={styles.compColNormal}>{normal}</div>
-      <div style={styles.compColAlpha}>{alpha}</div>
-    </div>
-  );
-}
 
 const styles = {
   container: {
@@ -297,14 +266,6 @@ const styles = {
   fTitle: { fontSize: '24px', fontWeight: '900', color: '#fff', marginBottom: '16px' },
   fDesc: { fontSize: '16px', color: '#64748b', lineHeight: '1.7', fontWeight: '500' },
   
-  comparisonSec: { padding: '120px 0' },
-  comparisonTable: { borderRadius: '32px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' },
-  compHeader: { display: 'flex', background: 'rgba(255,255,255,0.02)', padding: '24px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
-  compRow: { display: 'flex', padding: '24px 40px' },
-  compCol: { flex: 1, fontSize: '13px', fontWeight: '900', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.1em' },
-  compColLabel: { flex: 1, color: '#fff', fontWeight: '800', fontSize: '15px' },
-  compColNormal: { flex: 1, color: '#64748b', fontSize: '15px', fontWeight: '500' },
-  compColAlpha: { flex: 1, color: '#fff', fontSize: '15px', fontWeight: '700' },
 
   finalCta: { padding: '120px 0', textAlign: 'center' },
   finalTitle: { fontSize: '56px', fontWeight: '900', color: '#fff', marginBottom: '48px', letterSpacing: '-0.04em' },
