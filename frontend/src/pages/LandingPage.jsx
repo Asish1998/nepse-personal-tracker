@@ -27,106 +27,130 @@ export default function LandingPage() {
           0% { opacity: 0; transform: translateY(20px); }
           100% { opacity: 1; transform: translateY(0); }
         }
-        @keyframes chart-up {
-          0% { height: 0%; opacity: 0; }
-          100% { height: var(--h); opacity: 1; }
-        }
         .floating { animation: float 6s ease-in-out infinite; }
         .fade-up { animation: fade-up 0.8s ease-out forwards; }
-        .bar { animation: chart-up 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .comparison-row { border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background 0.3s; }
+        .comparison-row:hover { background: rgba(255, 255, 255, 0.02); }
       `}</style>
 
-      {/* Advanced Animated Mesh Background */}
+      {/* Background Layers */}
       <div style={styles.movingBackground}></div>
       <div style={styles.overlayGlow}></div>
       
       <nav style={styles.nav}>
         <div style={styles.logo}>
-          <div style={styles.logoIcon}>AK</div>
-          <span style={styles.logoText}>NEPSE INTELLIGENCE</span>
+          <div style={styles.logoIcon}>α</div>
+          <span style={styles.logoText}>ALPHA TERMINAL</span>
         </div>
         <div style={styles.navLinks}>
           <button style={styles.loginBtn} onClick={() => navigate('/login')}>Sign In</button>
-          <button style={styles.registerBtn} onClick={() => navigate('/register')}>Join Terminal</button>
+          <button style={styles.registerBtn} onClick={() => navigate('/register')}>Launch Terminal</button>
         </div>
       </nav>
 
       <main style={styles.main}>
+        {/* HERO SECTION */}
         <section style={styles.heroSection}>
           <div style={styles.heroContent} className="fade-up">
-            <div style={styles.badge}>FINANCIAL OPERATING SYSTEM</div>
-            <h1 style={styles.title}>Precision Assets <br /> <span style={styles.gradientText}>NEPSE & Wealth</span></h1>
+            <div style={styles.badge}>PRECISION FINTECH PROTOCOL</div>
+            <h1 style={styles.title}>The Alpha Edge for <br /> <span style={styles.gradientText}>NEPSE Investors</span></h1>
             <p style={styles.subtitle}>
-              The first cloud-native terminal for NEPSE trading 
-              and localized wealth advisory. Dynamic WACC tracking, AI strategy auditing, and real-time portfolio intelligence.
+              Dominate the Nepal Stock Market with institutional-grade tools. 
+              Real-time WACC tracking, Neural signals, and advanced wealth protocols in one unified terminal.
             </p>
             <div style={styles.ctaGroup}>
-              <button style={styles.mainCta} onClick={() => navigate('/register')}>Launch Your Terminal</button>
-              <button style={styles.secondaryCta} onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}>
-                Explore Service Ecosystem
+              <button style={styles.mainCta} onClick={() => navigate('/register')}>Join 12k+ Active Traders</button>
+              <button style={styles.secondaryCta} onClick={() => document.getElementById('why-choose-us').scrollIntoView({ behavior: 'smooth' })}>
+                Why Alpha Terminal?
               </button>
             </div>
           </div>
 
-          {/* Antigravity Visual Element */}
           <div style={styles.visualContainer} className="floating">
-            <div style={styles.glassCard}>
-              <div style={styles.abstractChart}>
-                <div style={{...styles.chartBar, '--h': '40%', background: '#60a5fa'}} className="bar"></div>
-                <div style={{...styles.chartBar, '--h': '75%', background: '#818cf8'}} className="bar"></div>
-                <div style={{...styles.chartBar, '--h': '55%', background: '#34d399'}} className="bar"></div>
-                <div style={{...styles.chartBar, '--h': '90%', background: '#a78bfa'}} className="bar"></div>
-                <div style={{...styles.chartBar, '--h': '65%', background: '#f472b6'}} className="bar"></div>
+            <div style={styles.glassCard} className="glass">
+              <div style={styles.abstractVisual}>
+                <div style={styles.visualNode}>AI_PULSE_ACTIVE</div>
+                <div style={styles.pulseBar}></div>
               </div>
-              <div style={styles.wealthOverlay}>
-                <div style={styles.wealthLabel}>Wealth Advisor Localized</div>
-                <div style={styles.wealthAmount}>Rs. 1,45,250.00</div>
-                <div style={styles.wealthTrend}>+ 12.5% MTD Growth</div>
+              <div style={styles.heroStat}>
+                <div style={styles.statLabel}>MARKET ACCURACY</div>
+                <div style={styles.statVal}>99.4%</div>
+                <div style={styles.statSub}>Real-time Feed Sync</div>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="features" style={styles.features}>
+        {/* WHY CHOOSE US SECTION */}
+        <section id="why-choose-us" style={styles.features}>
           <div style={styles.sectionHeader} className="fade-up">
-            <h2 style={styles.sectionTitle}>Built for Professional Excellence</h2>
+            <h2 style={styles.sectionTitle}>Why Choose Alpha Terminal?</h2>
+            <p style={styles.sectionSub}>Engineered for those who treat NEPSE as a professional discipline, not a game of chance.</p>
             <div style={styles.sectionLine}></div>
           </div>
 
           <div style={styles.featureGrid}>
             <FeatureCard 
-              icon="📈" 
-              title="Secondary Market" 
-              desc="Deep integration with NEPSE live feed. Accurate WACC, fee handling, and CGT liability auditing." 
-              gradient="linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)"
-            />
-            <FeatureCard 
-              icon="💰" 
-              title="Wealth Advisor" 
-              desc="Localized wealth management in NPR (Rs.) with automated asset distribution and expense tracking." 
-              gradient="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+              icon="⚡" 
+              title="Global-Grade NEPSE Terminals" 
+              desc="High-frequency data integration with real-time WACC, auto-dividend auditing, and automated CGT liability calculation." 
+              gradient="linear-gradient(135deg, #00f2ff 0%, #006aff 100%)"
             />
             <FeatureCard 
               icon="🧠" 
-              title="AI Strategy Audit" 
-              desc="Quant-driven insights using Gemini AI to evaluate your trade rationale and psychological discipline." 
-              gradient="linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)"
+              title="Neural Decision Auditing" 
+              desc="Powered by Gemini AI (LLM-Gen3) to evaluate your trade rationale, filter noise, and enforce emotional discipline." 
+              gradient="linear-gradient(135deg, #7000ff 0%, #d400ff 100%)"
+            />
+            <FeatureCard 
+              icon="🛡️" 
+              title="Asset Intelligence Protocol" 
+              desc="Localized wealth management tracking NPR (Rs.) across sectors with institutional risk profiling and asset rotation alerts." 
+              gradient="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
             />
             <FeatureCard 
               icon="☁️" 
-              title="Global Cloud Sync" 
-              desc="Zero-loss data persistence powered by Supabase. Securely accessible from any mobile or desktop device." 
+              title="Zero-Loss Cloud Infrastructure" 
+              desc="Military-grade data persistence via Supabase RLS. Your portfolio is mirrored across all devices with instant sync." 
               gradient="linear-gradient(135deg, #10b981 0%, #047857 100%)"
             />
           </div>
         </section>
 
+        {/* COMPARISON TABLE */}
+        <section style={styles.comparisonSec}>
+          <div style={styles.sectionHeader} className="fade-up">
+            <h2 style={styles.sectionTitle}>Stop Trading in the Dark</h2>
+            <p style={styles.sectionSub}>The difference between retail guessing and institutional execution.</p>
+          </div>
+
+          <div className="glass" style={styles.comparisonTable}>
+            <div style={styles.compHeader}>
+              <div style={styles.compCol}>Decision Matrix</div>
+              <div style={styles.compCol}>Normal Investor</div>
+              <div style={{ ...styles.compCol, color: '#00f2ff' }}>Alpha Terminal User</div>
+            </div>
+            
+            <ComparisonRow label="Trade Rationale" normal="Guessing & Rumors" alpha="Data-Driven AI Intelligence" />
+            <ComparisonRow label="Analysis Speed" normal="Manual Spreadsheet Work" alpha="AI-Powered Instant Analysis" />
+            <ComparisonRow label="Psycology" normal="Emotional & Panic Moves" alpha="Confidence-Backed Execution" />
+            <ComparisonRow label="Market Timing" normal="Late Entries / FOMO" alpha="Early Machine-Signal Alerts" />
+            <ComparisonRow label="Taxation/Fees" normal="Manual & Error-Prone" alpha="Automated WACC & CGT Auditing" />
+          </div>
+        </section>
+
+        <section style={styles.finalCta}>
+          <h2 style={styles.finalTitle}>Start Investing Intelligently.</h2>
+          <button style={styles.mainCtaLarge} onClick={() => navigate('/register')}>Launch Your Free Terminal</button>
+        </section>
+
         <footer style={styles.footer}>
           <div style={styles.footerBrand}>
-            <div style={styles.logoIconSmall}>AK</div>
-            <span>AK-NEPSE Terminal v2.1</span>
+            <div style={styles.logoIconSmall}>α</div>
+            <span>Alpha Terminal v3.0 // Unified Finance Protocol</span>
           </div>
-          <p style={styles.footerText}>© 2026 Developed by Ashish Khanal. Precision-engineered FinTech Solutions.</p>
+          <p style={styles.footerText}>© 2026 Developed by Ashish Khanal. Audited Financial Intelligence for the Nepalese Market.</p>
         </footer>
       </main>
     </div>
@@ -143,19 +167,29 @@ function FeatureCard({ icon, title, desc, gradient }) {
   );
 }
 
+function ComparisonRow({ label, normal, alpha }) {
+  return (
+    <div className="comparison-row" style={styles.compRow}>
+      <div style={styles.compColLabel}>{label}</div>
+      <div style={styles.compColNormal}>{normal}</div>
+      <div style={styles.compColAlpha}>{alpha}</div>
+    </div>
+  );
+}
+
 const styles = {
   container: {
     minHeight: '100vh',
-    background: '#0f172a',
-    color: '#fff',
-    fontFamily: "'Inter', sans-serif",
+    background: '#020617',
+    color: '#94a3b8',
+    fontFamily: "'Inter', system-ui, sans-serif",
     overflowX: 'hidden',
     position: 'relative'
   },
   movingBackground: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
-    background: 'linear-gradient(-45deg, #0f172a, #1e1b4b, #1e293b, #0c4a6e)',
+    background: 'linear-gradient(-45deg, #020617, #0f172a, #1e1b4b, #020617)',
     backgroundSize: '400% 400%',
     animation: 'bg-slide 15s ease infinite',
     zIndex: 0
@@ -163,7 +197,7 @@ const styles = {
   overlayGlow: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
-    background: 'radial-gradient(circle at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 60%)',
+    background: 'radial-gradient(circle at 50% 0%, rgba(99,102,241,0.12) 0%, transparent 70%)',
     zIndex: 1,
     pointerEvents: 'none'
   },
@@ -174,20 +208,20 @@ const styles = {
     alignItems: 'center',
     position: 'relative',
     zIndex: 10,
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto'
   },
   logo: { display: 'flex', alignItems: 'center', gap: '12px' },
-  logoIcon: { background: '#6366f1', color: '#fff', padding: '6px 10px', borderRadius: '8px', fontWeight: '900', fontSize: '14px' },
-  logoText: { fontWeight: '800', fontSize: '20px', letterSpacing: '-0.02em', color: '#fff' },
+  logoIcon: { background: 'linear-gradient(135deg, #00f2ff, #7000ff)', color: '#fff', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '20px' },
+  logoText: { fontWeight: '900', fontSize: '22px', letterSpacing: '-0.04em', color: '#fff' },
   navLinks: { display: 'flex', gap: '24px', alignItems: 'center' },
-  loginBtn: { background: 'none', border: 'none', color: '#94a3b8', fontWeight: '700', fontSize: '14px', cursor: 'pointer' },
-  registerBtn: { background: '#fff', color: '#0f172a', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: '800', fontSize: '13px', cursor: 'pointer' },
+  loginBtn: { background: 'none', border: 'none', color: '#94a3b8', fontWeight: '800', fontSize: '14px', cursor: 'pointer' },
+  registerBtn: { background: '#fff', color: '#020617', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: '900', fontSize: '13px', cursor: 'pointer' },
   
   main: { position: 'relative', zIndex: 10, maxWidth: '1200px', margin: '0 auto', padding: '0 24px' },
   
   heroSection: {
-    padding: '100px 0 120px 0',
+    padding: '120px 0 160px 0',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -195,13 +229,13 @@ const styles = {
     flexWrap: 'wrap'
   },
   heroContent: { flex: 1, minWidth: '400px' },
-  badge: { display: 'inline-block', background: 'rgba(99, 102, 241, 0.1)', color: '#818cf8', padding: '6px 16px', borderRadius: '40px', fontSize: '11px', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '24px', border: '1px solid rgba(99, 102, 241, 0.2)' },
-  title: { fontSize: '72px', fontWeight: '900', lineHeight: '1.05', letterSpacing: '-0.04em', color: '#fff', marginBottom: '28px' },
-  gradientText: { background: 'linear-gradient(to right, #818cf8, #f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
-  subtitle: { fontSize: '20px', color: '#94a3b8', maxWidth: '600px', lineHeight: '1.6', marginBottom: '48px', fontWeight: '500' },
+  badge: { display: 'inline-block', background: 'rgba(0, 242, 255, 0.05)', color: '#00f2ff', padding: '6px 16px', borderRadius: '40px', fontSize: '11px', fontWeight: '900', letterSpacing: '0.12em', marginBottom: '32px', border: '1px solid rgba(0, 242, 255, 0.1)' },
+  title: { fontSize: '76px', fontWeight: '900', lineHeight: '1.02', letterSpacing: '-0.05em', color: '#fff', marginBottom: '32px' },
+  gradientText: { background: 'linear-gradient(to right, #00f2ff, #7000ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
+  subtitle: { fontSize: '22px', color: '#64748b', maxWidth: '600px', lineHeight: '1.6', marginBottom: '56px', fontWeight: '500' },
   ctaGroup: { display: 'flex', gap: '16px' },
-  mainCta: { background: '#6366f1', color: '#fff', border: 'none', padding: '18px 40px', borderRadius: '12px', fontWeight: '800', fontSize: '16px', cursor: 'pointer', boxShadow: '0 20px 40px -10px rgba(99, 102, 241, 0.4)' },
-  secondaryCta: { background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '18px 40px', borderRadius: '12px', fontWeight: '800', fontSize: '16px', cursor: 'pointer', backdropFilter: 'blur(10px)' },
+  mainCta: { background: '#006aff', color: '#fff', border: 'none', padding: '20px 48px', borderRadius: '14px', fontWeight: '900', fontSize: '16px', cursor: 'pointer', boxShadow: '0 20px 40px -10px rgba(0, 106, 255, 0.4)' },
+  secondaryCta: { background: 'rgba(255,255,255,0.03)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 48px', borderRadius: '14px', fontWeight: '900', fontSize: '16px', cursor: 'pointer' },
 
   visualContainer: {
     flex: 1,
@@ -213,59 +247,71 @@ const styles = {
     position: 'relative'
   },
   glassCard: {
-    width: '380px',
-    height: '380px',
-    background: 'rgba(255, 255, 255, 0.03)',
+    width: '400px',
+    height: '400px',
     borderRadius: '40px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    backdropFilter: 'blur(40px)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '40px',
-    boxShadow: '0 40px 100px -20px rgba(0,0,0,0.5)',
+    padding: '48px',
+    boxShadow: '0 40px 100px -20px rgba(0,0,0,0.6)',
     position: 'relative'
   },
-  abstractChart: {
+  abstractVisual: {
     width: '100%',
-    height: '140px',
+    height: '120px',
     display: 'flex',
-    alignItems: 'flex-end',
+    flexDirection: 'column',
+    alignItems: 'center',
     justifyContent: 'center',
-    gap: '12px',
-    marginBottom: '40px'
+    gap: '16px',
+    marginBottom: '48px'
   },
-  chartBar: {
-    width: '36px',
-    borderRadius: '8px 8px 4px 4px',
-    opacity: 0.9,
-    boxShadow: '0 10px 20px -5px rgba(0,0,0,0.3)'
+  visualNode: { 
+    fontSize: '10px', 
+    fontFamily: 'monospace', 
+    color: '#00f2ff', 
+    background: 'rgba(0, 242, 255, 0.1)', 
+    padding: '4px 12px', 
+    borderRadius: '4px',
+    letterSpacing: '2px'
   },
-  wealthOverlay: {
+  pulseBar: { width: '80%', height: '2px', background: 'linear-gradient(90deg, transparent, #00f2ff, transparent)', animation: 'pulse 2s infinite' },
+  heroStat: {
     width: '100%',
-    background: 'rgba(255,255,255,0.05)',
-    padding: '24px',
-    borderRadius: '24px',
-    border: '1px solid rgba(255,255,255,0.1)',
     textAlign: 'center'
   },
-  wealthLabel: { fontSize: '11px', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' },
-  wealthAmount: { fontSize: '28px', fontWeight: '950', color: '#fff', marginBottom: '4px' },
-  wealthTrend: { fontSize: '12px', color: '#34d399', fontWeight: '800' },
+  statLabel: { fontSize: '11px', color: '#475569', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' },
+  statVal: { fontSize: '56px', fontWeight: '950', color: '#fff', marginBottom: '8px', letterSpacing: '-0.04em' },
+  statSub: { fontSize: '13px', color: '#00f2ff', fontWeight: '800' },
 
-  features: { padding: '100px 0' },
-  sectionHeader: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '80px' },
-  sectionTitle: { fontSize: '42px', fontWeight: '900', color: '#fff', letterSpacing: '-0.02em', textAlign: 'center' },
-  sectionLine: { width: '60px', height: '6px', background: '#6366f1', marginTop: '24px', borderRadius: '10px' },
-  featureGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px' },
-  fCard: { padding: '48px 40px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '32px', border: '1px solid rgba(255, 255, 255, 0.05)', transition: 'all 0.3s ease' },
-  fIcon: { width: '72px', height: '72px', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px', margin: '0 auto 32px auto', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)' },
-  fTitle: { fontSize: '24px', fontWeight: '850', color: '#fff', marginBottom: '16px', textAlign: 'center' },
-  fDesc: { fontSize: '16px', color: '#94a3b8', lineHeight: '1.7', fontWeight: '500', textAlign: 'center' },
+  features: { padding: '120px 0' },
+  sectionHeader: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '100px', textAlign: 'center' },
+  sectionTitle: { fontSize: '52px', fontWeight: '900', color: '#fff', letterSpacing: '-0.04em', marginBottom: '16px' },
+  sectionSub: { fontSize: '20px', color: '#64748b', maxWidth: '600px' },
+  sectionLine: { width: '40px', height: '4px', background: '#00f2ff', marginTop: '32px', borderRadius: '10px' },
+  featureGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' },
+  fCard: { padding: '56px 48px', borderRadius: '32px', transition: 'all 0.3s ease' },
+  fIcon: { width: '64px', height: '64px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', marginBottom: '32px', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)' },
+  fTitle: { fontSize: '24px', fontWeight: '900', color: '#fff', marginBottom: '16px' },
+  fDesc: { fontSize: '16px', color: '#64748b', lineHeight: '1.7', fontWeight: '500' },
   
-  footer: { padding: '100px 0 60px 0', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' },
-  footerBrand: { display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', fontWeight: '800', color: '#fff', fontSize: '16px' },
-  logoIconSmall: { background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontWeight: '900', fontSize: '11px', marginRight: '8px' },
-  footerText: { fontSize: '14px', color: '#64748b', fontWeight: '500' }
+  comparisonSec: { padding: '120px 0' },
+  comparisonTable: { borderRadius: '32px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' },
+  compHeader: { display: 'flex', background: 'rgba(255,255,255,0.02)', padding: '24px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
+  compRow: { display: 'flex', padding: '24px 40px' },
+  compCol: { flex: 1, fontSize: '13px', fontWeight: '900', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.1em' },
+  compColLabel: { flex: 1, color: '#fff', fontWeight: '800', fontSize: '15px' },
+  compColNormal: { flex: 1, color: '#64748b', fontSize: '15px', fontWeight: '500' },
+  compColAlpha: { flex: 1, color: '#fff', fontSize: '15px', fontWeight: '700' },
+
+  finalCta: { padding: '120px 0', textAlign: 'center' },
+  finalTitle: { fontSize: '56px', fontWeight: '900', color: '#fff', marginBottom: '48px', letterSpacing: '-0.04em' },
+  mainCtaLarge: { background: '#fff', color: '#020617', border: 'none', padding: '24px 64px', borderRadius: '16px', fontWeight: '900', fontSize: '18px', cursor: 'pointer', boxShadow: '0 30px 60px -12px rgba(255, 255, 255, 0.2)' },
+
+  footer: { padding: '120px 0 80px 0', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' },
+  footerBrand: { display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', fontWeight: '900', color: '#fff', fontSize: '18px', gap: '16px' },
+  logoIconSmall: { background: 'rgba(255,255,255,0.1)', color: '#fff', width: '28px', height: '28px', borderRadius: '6px', fontWeight: '900', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  footerText: { fontSize: '14px', color: '#475569', fontWeight: '600' }
 };
