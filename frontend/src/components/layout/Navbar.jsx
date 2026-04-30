@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useNavigate } from 'react-router-dom'
 import AISettingsModal from '../shared/AISettingsModal'
+import { supabase } from '../../utils/supabase'
+
 
 const tabs = [
   { key: 'home',         label: 'Home' },
