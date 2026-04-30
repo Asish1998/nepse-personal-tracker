@@ -1,16 +1,22 @@
-import { useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { fmtNPR } from '../../utils/formatters'
 
 const features = [
-  { icon: '💼', title: 'Quantum Tracking', desc: 'Real-time WACC, P/L and holdings analysis.', key: 'portfolio' },
-  { icon: '⚡', title: 'AI Intelligence', desc: 'Neural forecasting and risk assessment.', key: 'intelligence' },
-  { icon: '🛠️', title: 'Trading Terminal', desc: 'Integrated journal and smart watchlist.', key: 'hub' },
-  { icon: '💰', title: 'Wealth Command', desc: 'Unified asset and budget tracking.', key: 'wealth' },
+  { icon: '💼', title: 'Portfolio Manager', desc: 'Real-time WACC, P/L and holdings analysis.', key: 'portfolio' },
+  { icon: '⚡', title: 'Market Analysis', desc: 'Neural forecasting and risk assessment.', key: 'intelligence' },
+  { icon: '🛠️', title: 'Trading Hub', desc: 'Integrated journal and smart watchlist.', key: 'hub' },
+  { icon: '💰', title: 'Wealth Advisor', desc: 'Unified asset and budget tracking.', key: 'wealth' },
 ]
 
 export default function MarketIntelligence({ onNavigate }) {
   const { state } = useApp()
+  const [tick, setTick] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => setTick(t => t + 1), 2000)
+    return () => clearInterval(timer)
+  }, [])
 
   // Real data derivation where possible
   const portfolioSummary = useMemo(() => {
@@ -23,7 +29,7 @@ export default function MarketIntelligence({ onNavigate }) {
   // Enhanced Market Simulation
   const marketData = useMemo(() => {
     const indexBase = 2744.45
-    const drift = (Math.sin(Date.now() / 50000) * 5)
+    const drift = (Math.sin(Date.now() / 10000) * 10) + (Math.random() * 2)
     return {
       index: indexBase + drift,
       change: -25.81 + drift,
@@ -35,18 +41,18 @@ export default function MarketIntelligence({ onNavigate }) {
         decline: 269 - (drift > 0 ? 10 : -5),
       },
       hotStocks: [
-        { sym: 'NICA', ltp: 890, change: 12.5, percent: 1.42 },
-        { sym: 'SHL', ltp: 450, change: 40.9, percent: 9.98 },
-        { sym: 'HDL', ltp: 2150, change: -15, percent: -0.69 },
-        { sym: 'HIDCL', ltp: 210, change: 5, percent: 2.44 },
-        { sym: 'AKJCL', ltp: 180, change: 2, percent: 1.12 }
+        { sym: 'NICA', ltp: 890 + (drift/10), change: 12.5, percent: 1.42 },
+        { sym: 'SHL', ltp: 450 + (drift/5), change: 40.9, percent: 9.98 },
+        { sym: 'HDL', ltp: 2150 - drift, change: -15, percent: -0.69 },
+        { sym: 'HIDCL', ltp: 210 + (drift/20), change: 5, percent: 2.44 },
+        { sym: 'AKJCL', ltp: 180 + (drift/30), change: 2, percent: 1.12 }
       ],
       alerts: [
         { type: 'BUY', sym: 'NTC', price: 920, time: '10:15 AM', signal: 'RSI Bullish Crossover' },
         { type: 'SELL', sym: 'UPPER', price: 410, time: '11:30 AM', signal: 'MACD Bearish Crossover' }
       ]
     }
-  }, [state.holdings])
+  }, [tick])
 
   const isUp = marketData.change >= 0
 

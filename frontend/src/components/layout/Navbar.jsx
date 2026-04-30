@@ -8,8 +8,8 @@ import { supabase } from '../../utils/supabase'
 
 const tabs = [
   { key: 'home',         label: 'Home' },
-  { key: 'portfolio',    label: 'Portfolio'      },
-  { key: 'intelligence', label: 'Analysis' },
+  { key: 'portfolio',    label: 'Portfolio Manager' },
+  { key: 'intelligence', label: 'Market Analysis' },
   { key: 'hub',          label: 'Trading Hub' },
   { key: 'charts',       label: 'Charts'},
   { key: 'wealth',       label: 'Wealth Advisor'},
