@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { fmtNPR } from '../utils/formatters'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+import Navbar from '../components/layout/Navbar'
 
 const CATEGORIES = {
   INCOME: ['Salary', 'Business', 'Bonus', 'Rent Income', 'Share Dividend', 'Interest', 'Other Income'],
@@ -89,10 +90,12 @@ export default function WealthManager() {
   const isOverBudget = totals.expense > budget
 
 
+  const isStandalone = window.location.pathname === '/wealth-manager'
+
   return (
     <div style={{ background: 'var(--bg-main)', minHeight: '100vh' }}>
-      <Navbar active="wealth" onChange={() => {}} />
-      <div style={{ ...styles.container, padding: '40px 32px', maxWidth: '1400px', margin: '0 auto' }}>
+      {isStandalone && <Navbar active="wealth" onChange={() => {}} />}
+      <div style={{ ...styles.container, padding: isStandalone ? '48px 40px' : '0', maxWidth: '1400px', margin: '0 auto' }}>
         <div style={styles.header}>
           <h1 style={styles.title}>Wealth Command Center</h1>
           <p style={styles.subtitle}>Localized financial management & asset tracking for Nepal.</p>
