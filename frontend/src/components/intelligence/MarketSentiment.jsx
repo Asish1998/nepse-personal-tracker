@@ -17,7 +17,7 @@ export default function MarketSentiment() {
 
   const fetchNews = async () => {
     try {
-      const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
+      const API_BASE = import.meta.env.VITE_NEPSE_API
       const res = await fetch(`${API_BASE}/news`)
       if (!res.ok) throw new Error('Failed to fetch news')
       const data = await res.json()

@@ -46,7 +46,7 @@ export default function HoldingForm({ onClose }) {
   }
 
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
+    const API_BASE = import.meta.env.VITE_NEPSE_API
     async function fetchSymbols() {
       try {
         const res = await fetch(`${API_BASE}/symbols`)

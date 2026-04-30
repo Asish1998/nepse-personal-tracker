@@ -8,7 +8,7 @@ export default function WatchlistManager() {
   const [symbols, setSymbols] = useState([])
 
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
+    const API_BASE = import.meta.env.VITE_NEPSE_API
     fetch(`${API_BASE}/symbols`).then(res => res.json()).then(data => {
       setSymbols(Array.isArray(data) ? data.map(d => (d.symbol||d.sym||'').toUpperCase()) : [])
     })
@@ -20,7 +20,7 @@ export default function WatchlistManager() {
   }, [state.watchlist])
 
   async function fetchPrices() {
-    const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
+    const API_BASE = import.meta.env.VITE_NEPSE_API
     const newPrices = { ...prices }
     for (const sym of state.watchlist) {
       try {

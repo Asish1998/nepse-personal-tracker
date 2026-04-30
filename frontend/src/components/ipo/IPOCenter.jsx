@@ -24,7 +24,7 @@ export default function IPOCenter() {
   const fetchCompanies = async () => {
     setFetchingCompanies(true)
     try {
-      const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
+      const API_BASE = import.meta.env.VITE_NEPSE_API
       const res = await fetch(`${API_BASE}/ipo/companies`)
       if (!res.ok) throw new Error('Failed to load companies')
       const data = await res.json()
@@ -47,7 +47,7 @@ export default function IPOCenter() {
 
     setLoading(true)
     const newResults = {}
-    const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
+    const API_BASE = import.meta.env.VITE_NEPSE_API || 'https://nepse-personal-tracker.onrender.com'
 
     for (const member of state.familyBOIDs) {
       try {

@@ -180,7 +180,7 @@ export function AppProvider({ children }) {
     if (!state.holdings?.length) return
     const fetchPrices = async () => {
       try {
-        const API_BASE = import.meta.env.VITE_NEPSE_API || 'http://localhost:3001'
+        const API_BASE = import.meta.env.VITE_NEPSE_API
         const res = await fetch(`${API_BASE}/symbols`)
         if (!res.ok) return
         const symbolsData = await res.json()

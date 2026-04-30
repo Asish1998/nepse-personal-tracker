@@ -2,13 +2,6 @@ import { useState, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { fmtNPR } from '../../utils/formatters'
 
-const features = [
-  { icon: '💼', title: 'Portfolio Manager', desc: 'Real-time WACC, P/L and holdings analysis.', key: 'portfolio' },
-  { icon: '⚡', title: 'Market Analysis', desc: 'Neural forecasting and risk assessment.', key: 'intelligence' },
-  { icon: '🛠️', title: 'Trading Hub', desc: 'Integrated journal and smart watchlist.', key: 'hub' },
-  { icon: '💰', title: 'Wealth Advisor', desc: 'Unified asset and budget tracking.', key: 'wealth' },
-]
-
 export default function MarketIntelligence({ onNavigate }) {
   const { state } = useApp()
   const [tick, setTick] = useState(0)
@@ -19,7 +12,8 @@ export default function MarketIntelligence({ onNavigate }) {
     const timer = setInterval(() => setTick(t => t + 1), 2500)
     
     // 2. Fetch dynamic symbols
-    fetch('http://localhost:3001/symbols')
+    const API_BASE = import.meta.env.VITE_NEPSE_API
+    fetch(`${API_BASE}/symbols`)
       .then(res => res.json())
       .then(setSymbols)
       .catch(() => {
@@ -81,19 +75,6 @@ export default function MarketIntelligence({ onNavigate }) {
 
   return (
     <div style={styles.container}>
-      {/* 1. Feature Highlights Row */}
-      <div style={styles.featureHighlightGrid}>
-        {features.map(f => (
-          <div key={f.key} className="card" style={styles.featureMiniCard} onClick={() => onNavigate(f.key)}>
-            <div style={styles.miniIconBox}>{f.icon}</div>
-            <div>
-              <div style={styles.miniTitle}>{f.title}</div>
-              <div style={styles.miniDesc}>{f.desc}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
       <header style={styles.header}>
         <div style={styles.headerLeft}>
           <h1 style={styles.title}>Alpha Intelligence Protocol</h1>
@@ -188,11 +169,6 @@ export default function MarketIntelligence({ onNavigate }) {
 
 const styles = {
   container: { display: 'flex', flexDirection: 'column', gap: '32px', paddingBottom: '40px' },
-  featureHighlightGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' },
-  featureMiniCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', cursor: 'pointer', transition: 'var(--transition)' },
-  miniIconBox: { width: '44px', height: '44px', background: 'var(--bg-sidebar)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)' },
-  miniTitle: { fontSize: '14px', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '-0.02em' },
-  miniDesc: { fontSize: '11px', color: 'var(--text-dim)', fontWeight: '600', marginTop: '2px' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' },
   title: { fontSize: '28px', fontWeight: '900', color: 'var(--text-main)', margin: 0, letterSpacing: '-0.05em' },
   subtitle: { fontSize: '13px', color: 'var(--accent)', fontWeight: '700', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' },
