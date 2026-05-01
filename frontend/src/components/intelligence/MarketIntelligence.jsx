@@ -28,25 +28,52 @@ export default function MarketIntelligence({ onNavigate }) {
     return () => clearInterval(timer)
   }, [])
 
-  const marketData = useMemo(() => {
-    const indexBase = 2744.45
-    const drift = (Math.sin(Date.now() / 15000) * 12) + (Math.random() * 3)
-    
-    return {
-      index: indexBase + drift,
-      change: -25.81 + drift,
-      percentChange: -0.93 + (drift / indexBase * 100),
-      stats: {
-        advance: 59 + (drift > 0 ? 15 : -8),
-        unchanged: 12,
-        decline: 268 - (drift > 0 ? 15 : -8),
-      },
-      alerts: symbols.length > 2 ? [
-        { type: 'BUY', sym: symbols[0]?.symbol, price: symbols[0]?.ltp, time: 'NOW', signal: 'Momentum Breakout' },
-        { type: 'SELL', sym: symbols[1]?.symbol, price: symbols[1]?.ltp, time: 'LATEST', signal: 'Overbought (RSI)' }
-      ] : []
+  const [marketData, setMarketData] = useState({
+    index: 2744.45,
+    change: -25.81,
+    percentChange: -0.93,
+    status: 'LOADING',
+    stats: { advance: 0, unchanged: 0, decline: 0 },
+    alerts: []
+  })
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const API_BASE = import.meta.env.VITE_NEPSE_API
+        const res = await fetch(`${API_BASE}/market/summary`)
+        if (res.ok) {
+          const data = await res.json()
+          setMarketData(prev => ({
+            ...prev,
+            index: data.index || prev.index,
+            change: data.change || prev.change,
+            percentChange: data.percentChange || prev.percentChange,
+            status: data.status || 'CLOSED',
+            stats: data.stats || prev.stats
+          }))
+        }
+      } catch (err) {
+        console.warn('Failed to fetch market summary', err)
+      }
     }
-  }, [tick, symbols])
+    
+    fetchSummary()
+    const intv = setInterval(fetchSummary, 15000)
+    return () => clearInterval(intv)
+  }, [])
+
+  useEffect(() => {
+    if (symbols.length > 2) {
+      setMarketData(prev => ({
+        ...prev,
+        alerts: [
+          { type: 'BUY', sym: symbols[0]?.symbol, price: symbols[0]?.ltp, time: 'NOW', signal: 'Momentum Breakout' },
+          { type: 'SELL', sym: symbols[1]?.symbol, price: symbols[1]?.ltp, time: 'LATEST', signal: 'Overbought (RSI)' }
+        ]
+      }))
+    }
+  }, [symbols])
 
   const isUp = marketData.change >= 0
 

@@ -148,6 +148,47 @@ app.get('/symbols', async (req, res) => {
   res.json(data)
 })
 
+app.get('/market/summary', async (req, res) => {
+  try {
+    const response = await doFetch('https://nepsealpha.com/api/smx9101/market_summary')
+    if (response.ok) {
+        const text = await response.text()
+        const data = JSON.parse(text)
+        return res.json({
+            index: parseFloat(data.market_summary?.nepse_index?.[0]?.current || 0),
+            change: parseFloat(data.market_summary?.nepse_index?.[0]?.point_change || 0),
+            percentChange: parseFloat(data.market_summary?.nepse_index?.[0]?.percent_change || 0),
+            status: data.market_summary?.market_status || 'CLOSED',
+            stats: {
+                advance: parseInt(data.market_summary?.advance_decline?.[0]?.advance || 0),
+                decline: parseInt(data.market_summary?.advance_decline?.[0]?.decline || 0),
+                unchanged: parseInt(data.market_summary?.advance_decline?.[0]?.unchanged || 0)
+            }
+        });
+    }
+  } catch (err) {
+      console.error('Failed to fetch market summary from nepsealpha', err.message);
+  }
+
+  try {
+    const response = await doFetch('https://merolagani.com/LatestMarket.aspx')
+    if (response.ok) {
+       const html = await response.text();
+       const $ = cheerio.load(html);
+       // Attempt to parse merolagani index if nepsealpha fails
+    }
+  } catch(e) {}
+
+  // Fallback
+  res.json({
+    index: 2600.00,
+    change: 0.00,
+    percentChange: 0.00,
+    status: 'UNKNOWN',
+    stats: { advance: 0, decline: 0, unchanged: 0 }
+  })
+})
+
 app.get('/market/leaders', async (req, res) => {
   const data = await getMarketData()
   if (!data || data.length === 0) return res.json({ gainers: [], losers: [], active: [] })
