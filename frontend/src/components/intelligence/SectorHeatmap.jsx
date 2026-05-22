@@ -23,11 +23,11 @@ export default function SectorHeatmap() {
       </div>
       <div style={styles.grid}>
         {sortedSectors.map(s => (
-          <div key={s.name} style={{ 
-            ...styles.sector, 
+          <div key={s.name} style={{
+            ...styles.sector,
             flexBasis: `${s.weight * 2}%`,
-            background: s.change >= 0 
-              ? `rgba(0, 242, 255, ${Math.min(0.1 + (s.change / 4), 1)})` 
+            background: s.change >= 0
+              ? `rgba(0, 242, 255, ${Math.min(0.1 + (s.change / 4), 1)})`
               : `rgba(255, 77, 77, ${Math.min(0.1 + (Math.abs(s.change) / 4), 1)})`,
             borderColor: s.change >= 0 ? 'var(--profit)' : 'var(--loss)'
           }}>
@@ -47,11 +47,11 @@ const styles = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' },
   title: { fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', letterSpacing: '0.08em' },
   live: { fontSize: '9px', fontWeight: '900', color: 'var(--accent)' },
-  grid: { 
-    display: 'flex', 
-    flexWrap: 'wrap', 
-    gap: '8px', 
-    minHeight: '180px' 
+  grid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+    minHeight: '180px'
   },
   sector: {
     padding: '16px',

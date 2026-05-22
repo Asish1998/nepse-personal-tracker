@@ -25,6 +25,13 @@ export default function TickerTape() {
   return (
     <div style={styles.container}>
       <div style={styles.track}>
+        {/*keyframes can't live in inline style objects */}
+    <style>{`
+      @keyframes ticker {
+        0%   { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+    `}</style>
         {tickerItems.map((item, idx) => (
           <div key={idx} style={styles.item}>
             <span style={styles.sym}>{item.sym}</span>

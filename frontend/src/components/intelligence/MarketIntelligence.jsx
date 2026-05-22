@@ -82,7 +82,7 @@ export default function MarketIntelligence({ onNavigate }) {
       <header style={styles.header}>
         <div style={styles.headerLeft}>
           <h1 style={styles.title}>Alpha Intelligence Protocol</h1>
-          <p style={styles.subtitle}>Unified Market Terminal • Active Session</p>
+          <p style={styles.subtitle}>Market Terminal • Active Session</p>
         </div>
       </header>
 

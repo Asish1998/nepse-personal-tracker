@@ -34,6 +34,23 @@ export default function Navbar({ active, onChange }) {
     }
   }
 
+  const getNepseMarketStatus = () => {
+    const now = new Date()
+    const nepTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (345 * 60000))
+    const day = nepTime.getDay() 
+    if (day === 5 || day === 6) return { status: 'CLOSED', dot: '#EF4444' }
+    
+    const h = nepTime.getHours()
+    const m = nepTime.getMinutes()
+    const t = h * 60 + m
+    
+    if (t >= 630 && t < 660) return { status: 'PRE-OPEN', dot: '#F59E0B' }
+    if (t >= 660 && t < 900) return { status: 'OPEN', dot: '#10B981' }
+    return { status: 'CLOSED', dot: '#EF4444' }
+  }
+
+  const market = getNepseMarketStatus()
+
   return (
     <>
       <header className="navbar-container" style={styles.header}>
@@ -62,15 +79,21 @@ export default function Navbar({ active, onChange }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ 
+            display: 'flex', alignItems: 'center', gap: '6px', 
+            background: 'var(--bg-sidebar)', padding: '6px 12px', 
+            borderRadius: '20px', border: '1px solid var(--border)',
+            fontSize: '11px', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '0.05em'
+          }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: market.dot, boxShadow: `0 0 8px ${market.dot}` }} />
+            NEPSE: {market.status}
+          </div>
+
           {user && (
             <div className="desktop-user" style={styles.userSection}>
               <div style={styles.userInfo}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ 
-                    width: 8, height: 8, borderRadius: '50%', 
-                    background: supabase ? 'var(--profit)' : 'var(--text-muted)',
-                    title: supabase ? 'Cloud Synced' : 'Local Mode (No Supabase)'
-                  }} />
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: supabase ? 'var(--profit)' : 'var(--text-muted)' }} />
                   <div style={styles.userName}>{user.name}</div>
                 </div>
                 <div style={styles.userEmail}>{user.email}</div>

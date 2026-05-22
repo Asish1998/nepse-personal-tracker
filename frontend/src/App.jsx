@@ -18,7 +18,7 @@ function ProtectedLayout() {
   }
   
   return (
-    <AppProvider key={user.id} storageKey={`nepse_v2_${user.id}`}>
+    <AppProvider key={user.id} storageKey={`nepse_${user.id}`}>
       <Outlet />
     </AppProvider>
   )
